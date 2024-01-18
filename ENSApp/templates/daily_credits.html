@@ -1,0 +1,126 @@
+{% load static %}
+<!doctype html>
+<html lang="Eng">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.rtl.min.css" integrity="sha384-WJUUqfoMmnfkBLne5uxXj+na/c7sesSJ32gI7GfCk4zO4GthUKhSEGyvQ839BC51" crossorigin="anonymous">
+
+    <title>Ellora Natural Seeds Pvt Ltd</title>
+
+
+  </head>
+    <h1 style = "color:green;"> Ellora Natural Seeds Pvt Ltd.</h1>
+
+    <!-- Optional JavaScript; choose one of the two! -->
+    <nav class="navbar navbar-expand-lg bg-body-tertiary">
+      <div class="container-fluid">
+        <h3><a class="navbar-brand" href="{% url 'profile' %}">Home</a></H3>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+          <div class="navbar-nav">
+            <a class="nav-link" href="{% url 'punch_in' %}">Punch In</a>
+            <a class="nav-link" href="{% url 'punch_out' %}">Punch Out</a>
+            <a class="nav-link" href="{% url 'attendance' %}">Attendance</a>
+            <a class="nav-link" href="{% url 'total_cost' %}">Expenses</a>
+            <a class="nav-link" href="{% url 'logout' %}">LogOut</a>
+          </div>
+        </div>
+      </div>
+    </nav>
+  
+    <h4>Employee Name : {{ user.first_name }} {{ user.last_name }}</h4>
+    <p>Emp Id : {{ user.username }}&nbsp;&nbsp;&nbsp;&nbsp; Department : {{ user.employeeprofile.department }}&nbsp;&nbsp;&nbsp;&nbsp;Designation : {{ user.employeeprofile.designation }}&nbsp;&nbsp;&nbsp;&nbsp; Vehicle Number : {{ user.employeeprofile.vehicle_number }}&nbsp;&nbsp;&nbsp;&nbsp; </p>
+
+
+    <!-- Option 1: Bootstrap Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js" integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js" integrity="sha384-oBqDVmMz9ATKxIep9tiCxS/Z9fNfEXiDAYTujMAeBAsjFuCZSmKbSSUnQlmh/jp3" crossorigin="anonymous"></script>
+    
+    <!-- Option 2: Separate Popper and Bootstrap JS -->
+    <!--
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js" integrity="sha384-oBqDVmMz9ATKxIep9tiCxS/Z9fNfEXiDAYTujMAeBAsjFuCZSmKbSSUnQlmh/jp3" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js" integrity="sha384-mQ93GR66B00ZXjt0YO5KlohRA5SY2XofN4zfuZxLkoj1gXtW8ANNCe9d5Y3eG5eD" crossorigin="anonymous"></script>
+    -->
+
+  </body>
+</html>
+<style>
+    table {
+      border-collapse: collapse;
+      width: 95%;
+      margin: 10px 20px
+    }
+    
+    th, td {
+      border: 1px solid black;
+      padding: 3px;
+      text-align: center;
+    }
+    p {margin: 10px 20px} 
+    h4 {margin: 10px 20px} 
+    h5 {margin: 10px 20px} 
+    span {margin: 5px 20px} 
+   
+
+    </style>
+ 
+  <table>
+    <thead>
+      <tr>
+        <th scope="col">Sr No.</th>
+        <th scope="col">Date</th>
+        <th scope="col">Vehicle Type</th>
+        <th scope="col">Opening KM</th>
+        <th scope="col">Closing KM</th>
+        <th scope="col">From</th>
+        <th scope="col">To</th>
+        <th scope="col">Daily KM</th>
+        <th scope="col">Ticket</th>
+        <th scope="col">Loadging/Boarding </th>
+        <th scope="col">DA</th>
+        <th scope="col">Amount</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for total in page_obj %}
+      <tr>
+        <th scope="row">{{ forloop.counter }}</th>
+        <td>{{ total.date }}</td>
+        <td>{{ total.vehicle_type }}</td>
+        <td>{{ total.morning_reading }}</td>
+        <td>{{ total.evening_reading }}</td>
+        <td>{{ total.punchin_from }} To {{ total.punchin_to }}</td>
+        <td>{{ total.punchout_from }} To {{ total.punchout_to }}</td>
+        <td>{{ total.daily_km }}</td>
+        <td>{{ total.ticket }}</td>
+        <td>{{ total.lodging_boarding }}</td>
+        <td>{{ total.d_a }}</td>
+        <td>{{ total.daily_cost }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <p>Total Cost={{ total_cost }}</p></br>
+  <p>Employee Sign: __________________&nbsp; HOD Sign: _________________ &nbsp; Approved by: __________________ &nbsp;Vehicle Incharge: ________________ &nbsp;Acc Sign: ____________________</p>
+<p><a href="{% url 'pdf' %}?download=1">Download Monthly Sheet</a></p>
+<!-- Pagination links -->
+<div class="pagination">
+    <span class="step-links">
+        {% if page_obj.has_previous %}
+            <a href="?page={{ page_obj.previous_page_number }}">previous</a>
+        {% endif %}
+
+        Page <span class="current-page">{{ page_obj.number }}</span>
+
+        {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}">next</a>
+        {% endif %}
+    </span>
+</div>
+</br>

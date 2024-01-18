@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<title>Ellora Natural Seeds Pvt Ltd</title>
+  <h1>Expense List</h1>
+  <table>
+    <thead>
+      <tr>
+        <th>Employee Name</th>
+        <th>Date/Time</th>
+        <th>Todays Work</th>
+        <th>Source</th>
+        <th>Destination</th>
+        <th>Reading Image</th>
+        <th>Manual Reading</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for expense in expenses %}
+        <tr>
+          <td>{{ expense.empname }}</td>
+          <td>{{ expense.intime }}</td>
+          <td>{{ expense.todays_work }}</td>
+          <td>{{ expense.source }}</td>
+          <td>{{ expense.destination }}</td>
+          <td><img src="{{ expense.reading_image.url }}" height="50" /></td>
+          <td>{{ expense.manual_reading }}</td>
+          <td>
+            <a href="{% url 'expense_update' expense.pk %}">Update</a>
+            <a href="{% url 'expense_delete' expense.pk %}">Delete</a>
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+ 

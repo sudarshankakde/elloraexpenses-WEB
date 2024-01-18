@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Ellora Natural Seeds Pvt Ltd</title>
+</head>
+<body>
+<h1>
+    Login Page
+</h1>
+{% if messages %}
+    {% for message in messages %}
+        {{ message }}
+    {% endfor %}
+{% endif %}
+<form action="{% url 'login' %}" method="POST">
+    {% csrf_token %}
+    <input type="text" name="username" placeholder="Username" required><br>
+    <input type="password" name="password" placeholder="Password" required><br>
+    <input type="checkbox" name="rememberme">Remamber Me<br>
+    <input type="submit" value="Log In">
+</form>
+<br>
+<a href="{% url 'signup' %}">Sign  Up</a>
+</body>
+</html>
+

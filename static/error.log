@@ -1,0 +1,26 @@
+[Mon Oct 16 14:56:35.217833 2023] [wsgi:error] [pid 7993:tid 140198078371584] [remote 49.15.245.108:46022] Not Found: /static/css/login.css
+[Mon Oct 16 14:59:21.160485 2023] [wsgi:error] [pid 7993:tid 140198078371584] [remote 49.15.245.108:45983] Not Found: /static/css/login.css
+[Mon Oct 16 14:59:23.310241 2023] [wsgi:error] [pid 7993:tid 140198078371584] [remote 49.15.245.108:45983] Not Found: /static/css/login.css
+[Mon Oct 16 14:59:25.437389 2023] [wsgi:error] [pid 7993:tid 140198078371584] [remote 49.15.245.108:45983] Not Found: /static/css/login.css
+[Mon Oct 16 14:59:29.771470 2023] [wsgi:error] [pid 7993:tid 140198195869440] [remote 49.15.245.108:45983] Not Found: /asdf
+[Mon Oct 16 14:59:57.347474 2023] [wsgi:error] [pid 7993:tid 140198078371584] [remote 49.15.245.108:46021] Not Found: /static/css/login.css
+Exception ignored in: <function Local.__del__ at 0x7f8263a288b0>
+Traceback (most recent call last):
+  File "/Project-folder/venv/lib/python3.8/site-packages/asgiref/local.py", line 94, in __del__
+NameError: name 'TypeError' is not defined
+Exception ignored in: <function Local.__del__ at 0x7f296e33f8b0>
+Traceback (most recent call last):
+  File "/Project-folder/venv/lib/python3.8/site-packages/asgiref/local.py", line 94, in __del__
+NameError: name 'TypeError' is not defined
+Exception ignored in: <function Local.__del__ at 0x7fb1f16328b0>
+Traceback (most recent call last):
+  File "/Project-folder/venv/lib/python3.8/site-packages/asgiref/local.py", line 94, in __del__
+NameError: name 'TypeError' is not defined
+Exception ignored in: <function Local.__del__ at 0x7fa3b73498b0>
+Traceback (most recent call last):
+  File "/Project-folder/venv/lib/python3.8/site-packages/asgiref/local.py", line 94, in __del__
+NameError: name 'TypeError' is not defined
+Exception ignored in: <function Local.__del__ at 0x7fa3b73498b0>
+Traceback (most recent call last):
+  File "/Project-folder/venv/lib/python3.8/site-packages/asgiref/local.py", line 94, in __del__
+NameError: name 'TypeError' is not defined

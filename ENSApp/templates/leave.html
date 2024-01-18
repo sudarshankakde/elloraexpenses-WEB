@@ -1,0 +1,100 @@
+{% load static %}
+<!doctype html>
+<html lang="Eng">
+
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.rtl.min.css"
+        integrity="sha384-WJUUqfoMmnfkBLne5uxXj+na/c7sesSJ32gI7GfCk4zO4GthUKhSEGyvQ839BC51" crossorigin="anonymous">
+
+    <title>Ellora Natural Seeds Pvt Ltd</title>
+
+
+</head>
+
+<body>
+    <h1 style="color:green;"> Ellora Natural Seeds Pvt Ltd.</h1>
+
+    <!-- Optional JavaScript; choose one of the two! -->
+    <nav class="navbar navbar-expand-lg bg-body-tertiary">
+        <div class="container-fluid">
+            <h3><a class="navbar-brand" href="{% url 'profile' %}">Home</a></H3>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup"
+                aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+                <div class="navbar-nav">
+                    <a class="nav-link" href="{% url 'punch_in' %}">Punch In</a>
+                    <a class="nav-link" href="{% url 'punch_out' %}">Punch Out</a>
+                    <a class="nav-link" href="{% url 'attendance' %}">Attendance</a>
+                    <a class="nav-link" href="{% url 'total_cost' %}">Expenses</a>
+                    <a class="nav-link" href="{% url 'logout' %}">LogOut</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+    <style>
+        table {
+          border-collapse: collapse;
+          width: 80%;
+          margin: 10px 20px
+        }
+        
+        th, td {
+          border: 1px solid black;
+          padding: 3px;
+          text-align: center;
+        }
+        h5 {
+            margin: 5px 20px
+        }
+        </style>
+        <h5> Present days: {{total}} </h5></br>
+        <h5> Employee ID: {{user.username}} </h5></br>
+        <h5> Employee Name: {{ user.first_name }} {{ user.last_name }} </h5></br>
+    <table>
+        <thead>
+            <tr>
+                <th scope="col">Sr. Num</th>
+                <th scope="col">Date</th>
+                <th scope="col">Punch In Time</th>
+                <th scope="col">Punch Out Time</th>
+                <th scope="col">Attendance</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for i in attendance %}
+            <tr>
+                <th scope="row">{{ forloop.counter }}</th>
+                <td>{{ i.date }}</td>
+                <td>{{ i.intime }}</td>
+                <td>{{ i.outtime}}</td>
+                <td>{{ i.present }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    
+
+
+    <!-- Option 1: Bootstrap Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"
+        integrity="sha384-oBqDVmMz9ATKxIep9tiCxS/Z9fNfEXiDAYTujMAeBAsjFuCZSmKbSSUnQlmh/jp3"
+        crossorigin="anonymous"></script>
+
+    <!-- Option 2: Separate Popper and Bootstrap JS -->
+    <!--
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js" integrity="sha384-oBqDVmMz9ATKxIep9tiCxS/Z9fNfEXiDAYTujMAeBAsjFuCZSmKbSSUnQlmh/jp3" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js" integrity="sha384-mQ93GR66B00ZXjt0YO5KlohRA5SY2XofN4zfuZxLkoj1gXtW8ANNCe9d5Y3eG5eD" crossorigin="anonymous"></script>
+    -->
+</body>
+
+</html>

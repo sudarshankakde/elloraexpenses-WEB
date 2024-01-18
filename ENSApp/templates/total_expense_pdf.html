@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="utf-8">
+    <title>Ellora Natural Seeds Pvt. Ltd.</title>
+    <style>
+        @page {
+            size: landscape;
+        }
+        body {
+            font-family: Arial, sans-serif;
+
+        }
+        h1 {
+            text-align: center;
+            margin-top: 50px;
+            
+        }
+        table {
+            width: 90%;
+            table-layout: active;
+            border-collapse: collapse;
+
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 1px;
+            text-align: center;
+        }
+        th.adjustable {
+            width: auto;
+            white-space: nowrap;
+        }
+        h3 {margin: 10px 20px} 
+        p {margin: 10px 20px} 
+    </style>
+</head>
+<body>
+    &nbsp;</br>
+    <h1>Ellora Natural Seeds Pvt. Ltd.</h1>
+
+    <h3>Employee Name : {{ user.first_name }} {{ user.last_name }}</h3>
+    <h3>Emp Id : {{ user.username }}&nbsp;&nbsp;&nbsp;&nbsp; Department : {{ employeeprofile.department }}&nbsp;&nbsp;&nbsp;&nbsp;Designation : {{ employeeprofile.designation }}&nbsp;&nbsp;&nbsp;&nbsp; Vehicle Number : {{ employeeprofile.vehicle_number }}</h3>
+
+    <table>
+        <colgroup>
+            <col>
+            <col class="adjustable">
+        </colgroup>
+        <thead>
+            <tr>
+                <th scope="col">Date</th>
+                <th scope="col">Vehicle Type</th>
+                <th scope="col">Opening KM</th>
+                <th scope="col">Closing KM</th>
+                <th scope="col">From</th>
+                <th scope="col">To</th>
+                <th scope="col">Daily KM</th>
+                <th scope="col">Ticket</th>
+                <th scope="col">Loadging/Boarding </th>
+                <th scope="col">DA</th>
+                <th scope="col">Amount</th>
+              </tr>
+        </thead>
+        <tbody>
+            {% for entry in total %}
+            <tr>
+                <th scope="row">{{ entry.date  }}</th>
+                <td>{{ entry.vehicle_type }}</td>
+                <td>{{ entry.morning_reading }}</td>
+                <td>{{ entry.evening_reading }}</td>
+                <td>{{ entry.punchin_from }} To {{ entry.punchin_to }}</td>
+                <td>{{ entry.punchout_from }} To {{ entry.punchout_to }}</td>
+                <td>{{ entry.daily_km }}</td>
+                <td>{{ entry.ticket }}</td>
+                <td>{{ entry.lodging_boarding }}</td>
+                <td>{{ entry.d_a }}</td>
+                <td>{{ entry.daily_cost }}</td>
+              </tr>
+            {% endfor %}
+        </tbody>
+        <tfoot>
+            <tr>
+                <th>Total Cost</th>
+                <td>{{ total_cost }}</td>
+            </tr>
+        </tfoot>
+    </table></br>
+    <p>Remarks:</p>
+    &nbsp;</br>
+    <p>Employee Sign: _______________________&nbsp; HOD Sign: __________________________ &nbsp; Vehicle Incharge: ________________________ &nbsp;Approved by: ___________________________ &nbsp;Acc Sign: _________________________</p>
+</body>
+</html>

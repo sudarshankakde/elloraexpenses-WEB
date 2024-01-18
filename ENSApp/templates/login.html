@@ -1,0 +1,44 @@
+{% load static %}
+
+<head>
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <title>Ellora Natural Seeds Pvt Ltd</title>
+   <link rel="stylesheet" type="text/css" href="static/css/login.css">
+</head>
+
+<body>
+
+   <div class="sidenav">
+      <div class="login-main-text">
+         <h2>Application<br> Login Page</h2>
+         <p>Welcome to Ellora Natural Seeds Pvt. Ltd.</p>
+      </div>
+   </div>
+   <div class="main">
+      <div class="col-md-6 col-sm-12">
+         <div class="login-form">
+            {% if messages %}
+            {% for message in messages %}
+            {{ message }}
+            {% endfor %}
+            {% endif %}
+
+            <form action="{% url 'login' %}" method="POST">
+               {% csrf_token %}
+               </br>
+               <div class="form-group">
+                  <label>Employee Id :</label>
+                  <input type="text" name="username" class="form-control" placeholder="Employee Id" required>
+               </div></br>
+               <div class="form-group">
+                  <label>Password :</label>
+                  <input type="password" name="password" class="form-control" placeholder="Password" required>
+               </div></br>
+               <button type="submit" class="btn btn-black">Login</button>
+               <button type="submit" class="btn btn-secondary">Register</button>
+            </form>
+         </div>
+      </div>
+   </div>
+</body>
