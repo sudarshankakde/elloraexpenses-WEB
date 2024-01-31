@@ -159,7 +159,8 @@ REST_FRAMEWORK = {
 CLOUDINARY_STORAGE = {
     'CLOUD_NAME': 'dpgsqdi7d',
     'API_KEY': '296642484848834',
-    'API_SECRET': 'KAkF1ktnIaX1t-PGYvbYEfuMBDs'
+    'API_SECRET': 'KAkF1ktnIaX1t-PGYvbYEfuMBDs',
+    'api_proxy': 'https://elloraexpenses.pythonanywhere.com/'
 }
 
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
