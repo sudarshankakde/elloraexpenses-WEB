@@ -159,8 +159,16 @@ REST_FRAMEWORK = {
 CLOUDINARY_STORAGE = {
     'CLOUD_NAME': 'dpgsqdi7d',
     'API_KEY': '296642484848834',
-    'API_SECRET': 'KAkF1ktnIaX1t-PGYvbYEfuMBDs',
-    'API_PROXY': 'https://elloraexpenses.pythonanywhere.com/'
+    'API_SECRET': 'KAkF1ktnIaX1t-PGYvbYEfuMBDs'
 }
+
+import cloudinary
+cloudinary.config(
+    cloud_name="dpgsqdi7d",
+    api_key="296642484848834",
+    api_secret="KAkF1ktnIaX1t-PGYvbYEfuMBDs",
+    api_proxy="http://proxy.server:3128"
+)
+
 
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
