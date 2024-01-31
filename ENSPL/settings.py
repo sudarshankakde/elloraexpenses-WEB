@@ -12,7 +12,6 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 
 from pathlib import Path
 import os
-import cloudinary_storage
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -26,7 +25,7 @@ SECRET_KEY = 'django-insecure-h1=+fb69e@dx=p#%r$q&%w)ov4xn3d8#d2%lp9f#$9cuwmq_k)
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["elloraexpenses.in","193.203.161.49","127.0.0.1",'localhost']
+ALLOWED_HOSTS = ["elloraexpenses.in","127.0.0.1",'localhost','https://elloraexpenses.pythonanywhere.com/']
 # ALLOWED_HOSTS = ["*"]
 
 
