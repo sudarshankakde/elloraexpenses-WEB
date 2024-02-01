@@ -667,15 +667,18 @@ from django.shortcuts import get_object_or_404
 from .models import AppUpdate
 
 def download_apk(request):
-    if request.method == 'GET':
-        current_version = str(request.GET.get('version'))
-        latest_app = AppUpdate.objects.all().order_by('-release_date').first()
-        print(current_version)
-        print(latest_app.version_code)
-        print(latest_app.version_code == current_version)
-        if (latest_app.version_code == current_version) :
-            return JsonResponse({'message': 'Up to date'},status="404")
-        else:
-            response = FileResponse(latest_app.apk_file.open(), content_type='application/vnd.android.package-archive')
-            response['Content-Disposition'] = f'attachment; filename="{latest_app.apk_file.name}"'
-            return response
+    try:
+        if request.method == 'GET':
+            current_version = str(request.GET.get('version'))
+            latest_app = AppUpdate.objects.all().order_by('-release_date').first()
+            print(current_version)
+            print(latest_app.version_code)
+            print(latest_app.version_code > current_version)
+            if (latest_app.version_code > current_version):
+                return JsonResponse({'message': 'Up to date'},status="404")
+            else:
+                response = FileResponse(latest_app.apk_file.open(), content_type='application/vnd.android.package-archive')
+                response['Content-Disposition'] = f'attachment; filename="{latest_app.apk_file.name}"'
+                return response
+    except Exception as e:
+        return JsonResponse({'message': 'Error!',"error":f"{e}"},status="404")
