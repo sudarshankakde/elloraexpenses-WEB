@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import EmployeeProfile, Punch_In, Punch_Out, Total_Expense, Daily_Attendance
+from .models import EmployeeProfile, Punch_In, Punch_Out, Total_Expense, Daily_Attendance,AppUpdate
 from django.http import HttpResponseRedirect, HttpResponse
 from django.urls import reverse
 from django.template.loader import get_template
@@ -135,3 +135,6 @@ class DailyAttendanceAdmin(admin.ModelAdmin):
     date_hierarchy = 'date'
 # Register Daily_Attendance model with the custom admin class
 admin.site.register(Daily_Attendance, DailyAttendanceAdmin)
+
+
+admin.site.register(AppUpdate)

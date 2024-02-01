@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.forms import ValidationError
 class EmployeeProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     profile_picture = models.ImageField(upload_to='images/', default='default.png')
@@ -12,6 +13,7 @@ class EmployeeProfile(models.Model):
     work_location = models.CharField(max_length=30, blank=True)
     def __str__(self):
         return f"{self.user.first_name} {self.user.last_name} ({self.department})"
+    
 
 #Punch In
 
@@ -98,3 +100,30 @@ class Daily_Attendance(models.Model):
 
     class Meta:
          verbose_name_plural = "Daily Attendance"
+    
+from django.core.validators import FileExtensionValidator
+from django.core.files.storage import FileSystemStorage
+
+def validate_apk_file(value):
+    if not value.name.endswith('.apk'):
+        raise ValidationError('Only APK files are allowed.')
+
+class CustomFileSystemStorage(FileSystemStorage):
+    def get_available_name(self, name, max_length=None):
+        # Overwrite the file if it already exists
+        return name
+
+custom_storage = CustomFileSystemStorage(location='media/app_updates_files/')
+
+class AppUpdate(models.Model):
+    version_code = models.CharField(help_text='Version code= 1.0.0',max_length=10)
+    release_date = models.DateField(auto_now_add=True)
+    update_description = models.TextField()
+    apk_file = models.FileField(
+        upload_to='',
+        validators=[validate_apk_file],
+        storage=custom_storage
+    )
+    
+    def __str__(self):
+        return f'{self.version_code} ({self.release_date})'

@@ -48,6 +48,8 @@ urlpatterns = [
     path('allout',views.all_punchout,name='allpunchout'),
     path('attendance',views.attendance,name='attendance'),
     path('pdf',views.download_pdf,name='pdf'),
+    # apk updates
+    path('download_apk', views.download_apk, name='download-apk'),
 ]
 
 if settings.DEBUG:
