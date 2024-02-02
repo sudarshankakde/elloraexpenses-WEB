@@ -2,7 +2,7 @@ import datetime
 from django.db import models
 from django.contrib.auth.models import User
 from django.forms import ValidationError
-import django.utils.timezone as datetime_djnago
+import django.utils.datetime_safe as datetime_djnago
 class EmployeeProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     profile_picture = models.ImageField(upload_to='images/', default='default.png')
@@ -13,8 +13,11 @@ class EmployeeProfile(models.Model):
     birth_date = models.DateField(null=True, blank=True)
     address = models.CharField(max_length=200)
     work_location = models.CharField(max_length=30, blank=True)
+
     def __str__(self):
         return f"{self.user.first_name} {self.user.last_name} ({self.department})"
+    
+    
     
 
 #Punch In
@@ -28,7 +31,7 @@ class Punch_In(models.Model):
         ('By Auto','By Auto')
     ]
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    date = models.DateField(default=datetime_djnago.now)
+    date = models.DateField(default=str(datetime_djnago.date.today().strftime("%Y-%m-%d")))
     time=models.TimeField(auto_now_add=True, null=True,blank=True)
     vehicle_type = models.CharField(max_length=9, choices=VEHICLE_CHOICES)
     from_location = models.CharField(max_length=100)
@@ -42,11 +45,6 @@ class Punch_In(models.Model):
     def __str__(self):
         return f'{self.user.username} - {self.user.first_name} {self.user.last_name}'
 
-    def save(self, *args, **kwargs):
-        if not self.id:  # Check if it's a new object
-            self.date = str(datetime.date.today().strftime("%Y-%m-%d"))  # Set the date for new objects
-        super().save(*args, **kwargs)
-        
     class Meta:
          verbose_name_plural = "Punch In"
 
@@ -54,7 +52,7 @@ class Punch_In(models.Model):
 #Punch Out
 class Punch_Out(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    date = models.DateField(default=datetime_djnago.now)
+    date = models.DateField(default=str(datetime_djnago.date.today().strftime("%Y-%m-%d")))
     time=models.TimeField(auto_now_add=True, null=True)
     from_location = models.CharField(max_length=100)
     to_location = models.CharField(max_length=100)
@@ -70,10 +68,7 @@ class Punch_Out(models.Model):
     def __str__(self):
         return f'{self.user.username} - {self.user.first_name} {self.user.last_name}'
 
-    def save(self, *args, **kwargs):
-        if not self.id:  # Check if it's a new object
-            self.date = str(datetime.date.today().strftime("%Y-%m-%d"))  # Set the date for new objects
-        super().save(*args, **kwargs)
+
         
     class Meta:
          verbose_name_plural = "Punch Out"
@@ -81,7 +76,7 @@ class Punch_Out(models.Model):
 class Total_Expense(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     vehicle_type=models.CharField(max_length=10)
-    date = models.DateField(default=datetime_djnago.now)
+    date = models.DateField(default=str(datetime_djnago.date.today().strftime("%Y-%m-%d")))
     punchin_from=models.CharField(max_length=200)
     punchin_to=models.CharField(max_length=200)
     punchout_from=models.CharField(max_length=200)
@@ -96,11 +91,7 @@ class Total_Expense(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.daily_km} - {self.daily_cost}"
-    
-    def save(self, *args, **kwargs):
-        if not self.id:  # Check if it's a new object
-            self.date = str(datetime.date.today().strftime("%Y-%m-%d"))  # Set the date for new objects
-        super().save(*args, **kwargs)
+ 
     class Meta:
      verbose_name_plural = "Total Expense"
 
@@ -109,15 +100,12 @@ class Daily_Attendance(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     intime=models.TimeField(null=True)
     outtime=models.TimeField(null=True)
-    date = models.DateField(default=datetime_djnago.now)
+    date = models.DateField(default=str(datetime_djnago.date.today().strftime("%Y-%m-%d")))
     present = models.CharField(max_length=50)
 
     def __str__(self):
         return f'{self.user.username} - {self.user.first_name} {self.user.last_name}'
-    def save(self, *args, **kwargs):
-        if not self.id:  # Check if it's a new object
-            self.date = str(datetime.date.today().strftime("%Y-%m-%d"))  # Set the date for new objects
-        super().save(*args, **kwargs)
+
         
     class Meta:
          verbose_name_plural = "Daily Attendance"
