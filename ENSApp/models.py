@@ -1,6 +1,8 @@
+import datetime
 from django.db import models
 from django.contrib.auth.models import User
 from django.forms import ValidationError
+import django.utils.timezone as datetime_djnago
 class EmployeeProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     profile_picture = models.ImageField(upload_to='images/', default='default.png')
@@ -26,20 +28,25 @@ class Punch_In(models.Model):
         ('By Auto','By Auto')
     ]
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    date = models.DateField(auto_now_add=True,null=True)
-    time=models.TimeField(auto_now_add=True, null=True)
+    date = models.DateField(default=datetime_djnago.now)
+    time=models.TimeField(auto_now_add=True, null=True,blank=True)
     vehicle_type = models.CharField(max_length=9, choices=VEHICLE_CHOICES)
     from_location = models.CharField(max_length=100)
     to_location = models.CharField(max_length=100)
-    meter_photo = models.ImageField(upload_to='meter_photos/',verbose_name = "Meter Photo",null=True)
-    manual_reading = models.IntegerField(verbose_name = "Manual Reading",default=0,null=True)
-    ticket_amount = models.IntegerField(null=True)
-    ticket_photo = models.ImageField(upload_to='meter_photos/',null=True)
+    meter_photo = models.ImageField(upload_to='meter_photos/',verbose_name = "Meter Photo",null=True,blank=True)
+    manual_reading = models.IntegerField(verbose_name = "Manual Reading",default=0,null=True,blank=True)
+    ticket_amount = models.IntegerField(null=True,blank=True)
+    ticket_photo = models.ImageField(upload_to='meter_photos/',null=True,blank=True)
     todays_work = models.TextField()
 
     def __str__(self):
         return f'{self.user.username} - {self.user.first_name} {self.user.last_name}'
 
+    def save(self, *args, **kwargs):
+        if not self.id:  # Check if it's a new object
+            self.date = str(datetime.date.today().strftime("%Y-%m-%d"))  # Set the date for new objects
+        super().save(*args, **kwargs)
+        
     class Meta:
          verbose_name_plural = "Punch In"
 
@@ -47,29 +54,34 @@ class Punch_In(models.Model):
 #Punch Out
 class Punch_Out(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    date = models.DateField(auto_now_add=True,null=True)
+    date = models.DateField(default=datetime_djnago.now)
     time=models.TimeField(auto_now_add=True, null=True)
     from_location = models.CharField(max_length=100)
     to_location = models.CharField(max_length=100)
-    meter_photo = models.ImageField(upload_to='meter_photos/',verbose_name = "Meter Photo",null=True)
+    meter_photo = models.ImageField(upload_to='meter_photos/',verbose_name = "Meter Photo",null=True,blank = True)
     manual_reading = models.IntegerField(verbose_name = "Manual Reading",default=0, null=True)
-    ticket_amount = models.IntegerField(default=0,null=True)
-    ticket_photo = models.ImageField(upload_to='meter_photos/',null=True)
-    daily_allounce = models.IntegerField(default=0,verbose_name = "DA",null=True)
-    lodging = models.IntegerField(default=0,verbose_name = "Lodging/Boarding",null=True)
+    ticket_amount = models.IntegerField(default=0,null=True,blank = True)
+    ticket_photo = models.ImageField(upload_to='meter_photos/',null=True,blank = True)
+    daily_allounce = models.IntegerField(default=0,verbose_name = "DA",null=True,blank = True)
+    lodging = models.IntegerField(default=0,verbose_name = "Lodging/Boarding",null=True,blank = True)
     lodging_photo = models.ImageField(upload_to='meter_photos/',null=True,blank=True)
     todays_work = models.TextField()
 
     def __str__(self):
         return f'{self.user.username} - {self.user.first_name} {self.user.last_name}'
 
+    def save(self, *args, **kwargs):
+        if not self.id:  # Check if it's a new object
+            self.date = str(datetime.date.today().strftime("%Y-%m-%d"))  # Set the date for new objects
+        super().save(*args, **kwargs)
+        
     class Meta:
          verbose_name_plural = "Punch Out"
 
 class Total_Expense(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     vehicle_type=models.CharField(max_length=10)
-    date = models.DateField(auto_now_add=True)
+    date = models.DateField(default=datetime_djnago.now)
     punchin_from=models.CharField(max_length=200)
     punchin_to=models.CharField(max_length=200)
     punchout_from=models.CharField(max_length=200)
@@ -84,6 +96,11 @@ class Total_Expense(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.daily_km} - {self.daily_cost}"
+    
+    def save(self, *args, **kwargs):
+        if not self.id:  # Check if it's a new object
+            self.date = str(datetime.date.today().strftime("%Y-%m-%d"))  # Set the date for new objects
+        super().save(*args, **kwargs)
     class Meta:
      verbose_name_plural = "Total Expense"
 
@@ -92,12 +109,16 @@ class Daily_Attendance(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     intime=models.TimeField(null=True)
     outtime=models.TimeField(null=True)
-    date = models.DateField(auto_now_add=True)
+    date = models.DateField(default=datetime_djnago.now)
     present = models.CharField(max_length=50)
 
     def __str__(self):
         return f'{self.user.username} - {self.user.first_name} {self.user.last_name}'
-
+    def save(self, *args, **kwargs):
+        if not self.id:  # Check if it's a new object
+            self.date = str(datetime.date.today().strftime("%Y-%m-%d"))  # Set the date for new objects
+        super().save(*args, **kwargs)
+        
     class Meta:
          verbose_name_plural = "Daily Attendance"
     
