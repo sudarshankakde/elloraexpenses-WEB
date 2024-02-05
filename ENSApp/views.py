@@ -188,18 +188,26 @@ def punch_out_create(request):
     if request.method == 'POST':
         todays_date = date.today()
         form = PunchOutForm(request.POST, request.FILES)
+        print(form)
+        for_date = request.POST.get('date')
+
         last_punchout = Punch_Out.objects.filter(user=request.user).last()
-        if(last_punchout != None):
-            last_punchout_date = last_punchout.date
+        if(for_date != date.today()):
+            last_punchout_date = for_date
+            pass
         else:
-            yesterday = todays_date - timedelta(days = 1)
-            last_punchout_date = yesterday
+            if(last_punchout != None):
+                last_punchout_date = last_punchout.date
+            else:
+                yesterday = todays_date - timedelta(days = 1)
+                last_punchout_date = yesterday
         if form.is_valid():
+            print(for_date)
             if(last_punchout_date != todays_date):
                 punch_out = form.save(commit=False)
                 punch_out.user = request.user
                 punch_out.save()
-                attendance_records = Daily_Attendance.objects.filter(user=request.user, date=date.today())
+                attendance_records = Daily_Attendance.objects.filter(user=request.user, date=for_date)
                 print(f"Not Exist! {last_punchout_date} == {todays_date}")
                 if attendance_records.exists():
                     attendance_record = attendance_records.first()  # Select the first matching object
@@ -207,7 +215,8 @@ def punch_out_create(request):
                     attendance_record.save()
                 messages.success(request, 'Punch Out saved successfully.')
                 last_punchout = Punch_Out.objects.filter(user=request.user).last()
-                last_punchin = Punch_In.objects.filter(user=request.user).last()
+                last_punchin = Punch_In.objects.filter(user=request.user,date = for_date).last()
+                print(last_punchin)
                 vehicle=Punch_In.objects.filter(user=request.user).last()
 
                 if last_punchin.vehicle_type == '4 wheeler':
@@ -232,9 +241,7 @@ def punch_out_create(request):
 
                 else:
                     daily_cost = 0
-                
-                
-         
+                    
                 try:
                     total_expense = Total_Expense.objects.create(
                     user=request.user,
@@ -418,6 +425,7 @@ def apiLogin(request):
         login(request=request, user=user)
         user_json = serializers.serialize('json', [get_object_or_404(User,username=username)])
         return HttpResponse(user_json,content_type ='application/json')
+    
 def singUpApi(request):
     try:
         if request.method == "POST":
@@ -669,16 +677,19 @@ from .models import AppUpdate
 def download_apk(request):
     try:
         if request.method == 'GET':
-            current_version = str(request.GET.get('version'))
+            current_version = str(request.GET.get('version') or '0')
             latest_app = AppUpdate.objects.all().order_by('-release_date').first()
-            print(current_version)
-            print(latest_app.version_code)
-            print(latest_app.version_code > current_version)
-            if (latest_app.version_code > current_version):
-                return JsonResponse({'message': 'Up to date'},status="404")
+            if latest_app is None:
+                    return JsonResponse({'message': 'No APK to download'},status="404")
             else:
-                response = FileResponse(latest_app.apk_file.open(), content_type='application/vnd.android.package-archive')
-                response['Content-Disposition'] = f'attachment; filename="{latest_app.apk_file.name}"'
-                return response
+                print(current_version)
+                print(latest_app.version_code)
+                print(latest_app.version_code > current_version)
+                if (latest_app.version_code <= current_version):
+                    return JsonResponse({'message': 'Up to date'},status="404")
+                else:
+                    response = FileResponse(latest_app.apk_file.open(), content_type='application/vnd.android.package-archive')
+                    response['Content-Disposition'] = f'attachment; filename="{latest_app.apk_file.name}"'
+                    return response
     except Exception as e:
         return JsonResponse({'message': 'Error!',"error":f"{e}"},status="404")

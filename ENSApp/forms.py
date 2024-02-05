@@ -21,6 +21,9 @@ class PunchInForm(forms.ModelForm):
         model = Punch_In
         fields = ['vehicle_type','from_location', 'to_location', 'meter_photo', 'manual_reading','ticket_amount','ticket_photo', 'todays_work']
 
+class DateInput(forms.DateInput):
+    input_type = 'date'
+    
 #Punch Out form
 from .models import Punch_Out
 class PunchOutForm(forms.ModelForm):
@@ -31,10 +34,12 @@ class PunchOutForm(forms.ModelForm):
     daily_allounce = forms.IntegerField(required=False)
     lodging = forms.IntegerField(required=False)
     lodging_photo = forms.ImageField(required=False)
+    
     class Meta:
         model = Punch_Out
-        fields = ['from_location', 'to_location', 'meter_photo', 'manual_reading','ticket_amount','ticket_photo','daily_allounce','lodging','lodging_photo' ,'todays_work']
+        fields = ['date','from_location', 'to_location', 'meter_photo', 'manual_reading','ticket_amount','ticket_photo','daily_allounce','lodging','lodging_photo' ,'todays_work']
         labels = {
+            'For Which Date':'date',
             'from_location': 'From Location',
             'to_location': 'To Location',
             'meter_photo': 'Meter Photo',
@@ -42,6 +47,7 @@ class PunchOutForm(forms.ModelForm):
             'todays_work': "Work Status",
         }
         widgets = {
+            'date':DateInput(),
             'todays_work': forms.Textarea(attrs={'rows': 4}),
         }
 
