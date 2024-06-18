@@ -7,7 +7,7 @@ admin.site.site_title="Ellora Natural Seeds Pvt Ltd"
 admin.site.index_title="Welcome to Admin Panel"
 from rest_framework import routers
 from ENSApp.views import EmployeeProfileViewSet, PunchInViewSet, PunchOutViewSet, TotalExpenseViewSet, DailyAttendanceViewSet, UserViewSet,allPunchIn,getProfile
-
+from HOD import urls as hod_urls
 router = routers.DefaultRouter()
 router.register(r'users', UserViewSet)
 router.register(r'employee-profiles', EmployeeProfileViewSet)
@@ -21,6 +21,8 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("", include('ENSApp.urls')),
     path('api/', include(router.urls)),
+    path('hod-panel/', include(hod_urls)),
+    
    
 ] 
 if settings.DEBUG:

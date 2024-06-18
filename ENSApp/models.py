@@ -2,11 +2,37 @@ import datetime
 from django.db import models
 from django.contrib.auth.models import User
 from django.forms import ValidationError
-import django.utils.datetime_safe as datetime_djnago
+# import django.utils.datetime_safe as datetime_djnago
+from django.utils.timezone import now as dajngo_datetime
+
 class EmployeeProfile(models.Model):
+    DEPARTMENT_CHOICES = [
+        ('Account', 'Account'),
+        ('Admin', 'Admin'),
+        ('Biotech', 'Biotech'),
+        ('Construction', 'Construction'),
+        ('Electrical', 'Electrical'),
+        ('FWD', 'FWD'),
+        ('General', 'General'),
+        ('HR', 'HR'),
+        ('International Business Unit (IBU)', 'International Business Unit (IBU)'),
+        ('IT', 'IT'),
+        ('Logistics', 'Logistics'),
+        ('Production(Onion)', 'Production(Onion)'),
+        ('Production(Veg)', 'Production(Veg)'),
+        ('Production(Maize)', 'Production(Maize)'),
+        ('MD', 'MD'),
+        ('Purchase', 'Purchase'),
+        ('QA', 'QA'),
+        ('R&D', 'R&D'),
+        ('Security', 'Security'),
+        ('SPT', 'SPT'),
+        ('Vehicle', 'Vehicle'),
+    ]
+
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     profile_picture = models.ImageField(upload_to='images/', default='default.png')
-    department = models.CharField(max_length=100)
+    department = models.CharField(max_length=100,choices=DEPARTMENT_CHOICES)
     designation = models.CharField(max_length=100)
     vehicle_number=models.CharField(max_length=15)
     phone_number = models.CharField(max_length=20)
@@ -31,7 +57,7 @@ class Punch_In(models.Model):
         ('By Auto','By Auto')
     ]
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    date = models.DateField(default=str(datetime_djnago.date.today().strftime("%Y-%m-%d")))
+    date = models.DateField(default=dajngo_datetime)
     time=models.TimeField(auto_now_add=True, null=True,blank=True)
     vehicle_type = models.CharField(max_length=9, choices=VEHICLE_CHOICES)
     from_location = models.CharField(max_length=100)
@@ -52,7 +78,7 @@ class Punch_In(models.Model):
 #Punch Out
 class Punch_Out(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    date = models.DateField(default=str(datetime_djnago.date.today().strftime("%Y-%m-%d")))
+    date = models.DateField(default=dajngo_datetime)
     time=models.TimeField(auto_now_add=True, null=True)
     from_location = models.CharField(max_length=100)
     to_location = models.CharField(max_length=100)
@@ -63,6 +89,8 @@ class Punch_Out(models.Model):
     daily_allounce = models.IntegerField(default=0,verbose_name = "DA",null=True,blank = True)
     lodging = models.IntegerField(default=0,verbose_name = "Lodging/Boarding",null=True,blank = True)
     lodging_photo = models.ImageField(upload_to='meter_photos/',null=True,blank=True)
+    toll_parkking = models.IntegerField(default=0,verbose_name = "Toll/Fastag/Parking",null=True,blank = True)
+    other_expenses = models.IntegerField(default=0,verbose_name = "other_expenses",null=True,blank = True)
     todays_work = models.TextField()
 
     def __str__(self):
@@ -76,7 +104,7 @@ class Punch_Out(models.Model):
 class Total_Expense(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     vehicle_type=models.CharField(max_length=10)
-    date = models.DateField(default=str(datetime_djnago.date.today().strftime("%Y-%m-%d")))
+    date = models.DateField(default=dajngo_datetime)
     punchin_from=models.CharField(max_length=200)
     punchin_to=models.CharField(max_length=200)
     punchout_from=models.CharField(max_length=200)
@@ -87,6 +115,8 @@ class Total_Expense(models.Model):
     d_a = models.IntegerField(default=0,verbose_name = "DA")
     lodging_boarding = models.IntegerField(default=0,verbose_name = "Lodging/Boarding")
     daily_km = models.IntegerField(default=0)
+    toll_parkking = models.IntegerField(default=0,verbose_name = "Toll/Fastag/Parking",null=True,blank = True)
+    other_expenses = models.IntegerField(default=0,verbose_name = "other_expenses",null=True,blank = True)
     daily_cost = models.FloatField(default=0)
 
     def __str__(self):
@@ -100,7 +130,7 @@ class Daily_Attendance(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     intime=models.TimeField(null=True)
     outtime=models.TimeField(null=True)
-    date = models.DateField(default=str(datetime_djnago.date.today().strftime("%Y-%m-%d")))
+    date = models.DateField(default=dajngo_datetime)
     present = models.CharField(max_length=50)
 
     def __str__(self):
