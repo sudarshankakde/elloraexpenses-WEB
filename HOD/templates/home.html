@@ -1,0 +1,99 @@
+{% extends "hodBase.html" %} {% block body %}
+
+<div class="text-center w-[90%] mx-auto my-5">
+  <div class="flex flex-row justify-between items-center py-3">
+    <h3 class="text-xl font-normal tracking-wide">
+      Expenses Of :
+      <span class="font-semibold">{{expensesOF|date:"F,Y"}}</span>
+    </h3>
+   <span
+   class="flex flex-row justify-center items-center gap-2 rounded-md border-2 bg-blue-100  px-3 py-1.5 border-blue-300 capitalize opacity-90 text-sm "> <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
+    <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
+  </svg>click F3 or Ctrl+F To Search
+   
+   </span>
+    <div>
+      <label for="month" class="font-semibold tracking-wide"
+        >Change Expenses Month</label
+      >
+      <input
+        type="month"
+        id="monthInput"
+        class="rounded-lg"
+         value="{{expensesOF|date:'Y'}}-{{expensesOF|date:'m'}}"
+        max="{% now 'Y-m' %}"
+        min="2024-01"
+      />
+    </div>
+  </div>
+  <hr />
+</div>
+<div class="p-5 container mx-auto border border-blue-100 bg-blue-50 w-[95vw] mt-10">
+  
+  <div class="my-2 flex flex-row justify-between items-center text-lg capitalize">
+    <span class="text-2xl font-semibold tracking-wide">Employees in {{user_info.department}} Department
+    </span>
+    <span> Number of employees: {{employees|length }} </span>
+  </div>
+  <table class="table-auto w-full text-center border border-2 border-gray-700 border-collapse border-spacing-1">
+    <thead>
+      <tr >
+        <th class="border border-slate-500 bg-blue-200 py-3">Emp Id</th>
+        <th class="border border-slate-500 bg-blue-200 py-3">Name</th>
+        <th class="border border-slate-500 bg-blue-200">Designation</th>
+        <th class="border border-slate-500 bg-blue-200">Work location</th>
+        <th class="border border-slate-500 bg-blue-200">
+          Total Expenses 
+        </th>
+        <th class="border border-slate-500 bg-blue-200">Status</th>
+        <th class="border border-slate-500 bg-blue-200">Link</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for emp in employees %}
+      <tr class="">
+        <td class="border border-slate-500 p-1 text-blue-800"><a
+          href="{%url 'hod:view_employee' emp.employee.user.id%}?month={{approved_For_Month_Year|date:'m'}}&year{{approved_For_Month_Year|date:'Y'}}">{{ emp.employee.user.username }} </a></td>
+      <td class="border border-slate-500 p-1 ">
+
+        {{ emp.employee.user.first_name }} {{ emp.employee.user.last_name }}
+
+      </td>
+        <td class="border border-slate-500 p-1">
+          {{ emp.employee.designation }}
+        </td>
+        <td class="border border-slate-500 p-1">
+          {{ emp.employee.work_location }}
+        </td>
+        <td class="border border-slate-500 p-1">{{ emp.total_expense }}</td>
+        <td class="border border-slate-500 p-1  font-semibold">
+          {% if emp.status %} <span class="text-green-600">Approved</span> {% else %} <span class="text-red-500">
+            Approval Pending</span> {% endif %}
+        </td>
+        <td class="border border-slate-500 p-1">
+          <a href="{%url 'hod:view_employee' emp.employee.user.id %}?month={{expensesOF|date:'m'}}&year{{expensesOF|date:'Y'}}"" class="underline text-blue-800">
+            View
+          </a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock body %}
+{% block script %}
+<script>
+  document.getElementById("monthInput").addEventListener("change", function () {
+    var selectedDate = this.value; // Format: YYYY-MM
+    if (selectedDate) {
+      var parts = selectedDate.split("-");
+      var year = parts[0];
+      var month = parts[1];
+      var baseUrl = "{% url 'hod:HOD_home'%}"; // Get the base URL up to the first '0'
+      var url = baseUrl + `?&month=${month}&year=${year}`;
+      window.location.href = url;
+    }
+  });
+ 
+</script>
+{% endblock script %}

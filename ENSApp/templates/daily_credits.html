@@ -1,126 +1,189 @@
-{% load static %}
-<!doctype html>
-<html lang="Eng">
-  <head>
-    <!-- Required meta tags -->
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-
-    <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.rtl.min.css" integrity="sha384-WJUUqfoMmnfkBLne5uxXj+na/c7sesSJ32gI7GfCk4zO4GthUKhSEGyvQ839BC51" crossorigin="anonymous">
-
-    <title>Ellora Natural Seeds Pvt Ltd</title>
-
-
-  </head>
-    <h1 style = "color:green;"> Ellora Natural Seeds Pvt Ltd.</h1>
-
-    <!-- Optional JavaScript; choose one of the two! -->
-    <nav class="navbar navbar-expand-lg bg-body-tertiary">
-      <div class="container-fluid">
-        <h3><a class="navbar-brand" href="{% url 'profile' %}">Home</a></H3>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
-          <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
-          <div class="navbar-nav">
-            <a class="nav-link" href="{% url 'punch_in' %}">Punch In</a>
-            <a class="nav-link" href="{% url 'punch_out' %}">Punch Out</a>
-            <a class="nav-link" href="{% url 'attendance' %}">Attendance</a>
-            <a class="nav-link" href="{% url 'total_cost' %}">Expenses</a>
-            <a class="nav-link" href="{% url 'logout' %}">LogOut</a>
-          </div>
-        </div>
-      </div>
-    </nav>
-  
-    <h4>Employee Name : {{ user.first_name }} {{ user.last_name }}</h4>
-    <p>Emp Id : {{ user.username }}&nbsp;&nbsp;&nbsp;&nbsp; Department : {{ user.employeeprofile.department }}&nbsp;&nbsp;&nbsp;&nbsp;Designation : {{ user.employeeprofile.designation }}&nbsp;&nbsp;&nbsp;&nbsp; Vehicle Number : {{ user.employeeprofile.vehicle_number }}&nbsp;&nbsp;&nbsp;&nbsp; </p>
-
-
-    <!-- Option 1: Bootstrap Bundle with Popper -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js" integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js" integrity="sha384-oBqDVmMz9ATKxIep9tiCxS/Z9fNfEXiDAYTujMAeBAsjFuCZSmKbSSUnQlmh/jp3" crossorigin="anonymous"></script>
-    
-    <!-- Option 2: Separate Popper and Bootstrap JS -->
-    <!--
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js" integrity="sha384-oBqDVmMz9ATKxIep9tiCxS/Z9fNfEXiDAYTujMAeBAsjFuCZSmKbSSUnQlmh/jp3" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js" integrity="sha384-mQ93GR66B00ZXjt0YO5KlohRA5SY2XofN4zfuZxLkoj1gXtW8ANNCe9d5Y3eG5eD" crossorigin="anonymous"></script>
-    -->
-
-  </body>
-</html>
-<style>
-    table {
-      border-collapse: collapse;
-      width: 95%;
-      margin: 10px 20px
-    }
-    
-    th, td {
-      border: 1px solid black;
-      padding: 3px;
-      text-align: center;
-    }
-    p {margin: 10px 20px} 
-    h4 {margin: 10px 20px} 
-    h5 {margin: 10px 20px} 
-    span {margin: 5px 20px} 
-   
-
-    </style>
- 
-  <table>
-    <thead>
-      <tr>
-        <th scope="col">Sr No.</th>
-        <th scope="col">Date</th>
-        <th scope="col">Vehicle Type</th>
-        <th scope="col">Opening KM</th>
-        <th scope="col">Closing KM</th>
-        <th scope="col">From</th>
-        <th scope="col">To</th>
-        <th scope="col">Daily KM</th>
-        <th scope="col">Ticket</th>
-        <th scope="col">Loadging/Boarding </th>
-        <th scope="col">DA</th>
-        <th scope="col">Amount</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for total in page_obj %}
-      <tr>
-        <th scope="row">{{ forloop.counter }}</th>
-        <td>{{ total.date }}</td>
-        <td>{{ total.vehicle_type }}</td>
-        <td>{{ total.morning_reading }}</td>
-        <td>{{ total.evening_reading }}</td>
-        <td>{{ total.punchin_from }} To {{ total.punchin_to }}</td>
-        <td>{{ total.punchout_from }} To {{ total.punchout_to }}</td>
-        <td>{{ total.daily_km }}</td>
-        <td>{{ total.ticket }}</td>
-        <td>{{ total.lodging_boarding }}</td>
-        <td>{{ total.d_a }}</td>
-        <td>{{ total.daily_cost }}</td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-  <p>Total Cost={{ total_cost }}</p></br>
-  <p>Employee Sign: __________________&nbsp; HOD Sign: _________________ &nbsp; Approved by: __________________ &nbsp;Vehicle Incharge: ________________ &nbsp;Acc Sign: ____________________</p>
-<p><a href="{% url 'pdf' %}?download=1">Download Monthly Sheet</a></p>
-<!-- Pagination links -->
-<div class="pagination">
-    <span class="step-links">
-        {% if page_obj.has_previous %}
-            <a href="?page={{ page_obj.previous_page_number }}">previous</a>
-        {% endif %}
-
-        Page <span class="current-page">{{ page_obj.number }}</span>
-
-        {% if page_obj.has_next %}
-            <a href="?page={{ page_obj.next_page_number }}">next</a>
-        {% endif %}
-    </span>
+{% extends "base.html" %}
+{% load templatetags %}
+{% block body %}
+<h4>Employee Name : {{ user.first_name }} {{ user.last_name }}</h4>
+<div class="d-flex flex-row justify-content-between ">
+  <p>Emp Id : {{ user.username }}&nbsp;&nbsp;&nbsp;&nbsp; Department : {{ user.employeeprofile.department }}&nbsp;&nbsp;&nbsp;&nbsp;Designation : {{ user.employeeprofile.designation }}&nbsp;&nbsp;&nbsp;&nbsp; Vehicle
+    Number
+    : {{ user.employeeprofile.vehicle_number }}&nbsp;&nbsp;&nbsp;&nbsp; </p>
+  <div class="mx-5">
+    <label for="month" class="font-semibold tracking-wide">Change Expenses Month</label>
+    <input type="month" id="monthInput" class="rounded-lg" value="{{year}}-{{month}}" max="{% now 'Y-m' %}"
+      min="2024-01">
+  </div>
 </div>
+<style>
+  table {
+    border-collapse: collapse;
+    width: 95%;
+    margin: 10px 20px
+  }
+
+  th,
+  td {
+    border: 1px solid black;
+    padding: 3px;
+    text-align: center;
+  }
+
+  p {
+    margin: 10px 20px
+  }
+
+  h4 {
+    margin: 10px 20px
+  }
+
+  h5 {
+    margin: 10px 20px
+  }
+
+  span {
+    margin: 5px 20px
+  }
+
+  .content:before {
+    content: "*";
+  }
+
+  .text-orange-500 {
+    color: #f97316;
+    font-weight: 600;
+  }
+
+  .text-blue {
+    color: #1d4ed8;
+    font-weight: bold;
+  }
+</style>
+
+<table>
+  <thead>
+    <tr>
+      <th scope="col">Sr No.</th>
+      <th scope="col">Date</th>
+      <th scope="col">Vehicle Type</th>
+      <th scope="col">Opening KM</th>
+      <th scope="col">Closing KM</th>
+      <th scope="col">From</th>
+      <th scope="col">To</th>
+      <th scope="col">Daily KM</th>
+      <th scope="col">Ticket</th>
+      <th scope="col">Loadging/<br>Boarding </th>
+
+      <th scope="col">Daily <br> Allowance</th>
+      <th class="col">Toll/ Fastag/<br>Parking</th>
+      <th class="col">Other <br> Expenses</th>
+      <th scope="col">Amount</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for entry in expenses %}
+    <tr>
+      <th scope="row">{{ forloop.counter }}</th>
+      <td>{{ entry.expense.date }}</td>
+      <td>{{ entry.expense.vehicle_type }}</td>
+      <td>{{ entry.expense.morning_reading }}</td>
+      <td>{{ entry.expense.evening_reading }}</td>
+      <td>
+        {{ entry.expense.punchin_from }} To {{ entry.expense.punchin_to }}
+      </td>
+      <td>
+        {{ entry.expense.punchout_from }} To {{ entry.expense.punchout_to }}
+      </td>
+      <td>{{ entry.expense.daily_km }}</td>
+      <td
+        class="{% if entry.changes.ticket %} {% if approved.approved %}content{% endif %} text-orange-500 font-bold{% endif %}">
+        {{ entry.expense.ticket }}
+      </td>
+      <td
+        class="{% if entry.changes.lodging_boarding %} {% if approved.approved %}content{% endif %} text-orange-500 font-bold{% endif %}">
+        {{ entry.expense.lodging_boarding }}
+      </td>
+      <td
+        class="{% if entry.changes.d_a %} {% if approved.approved %}content{% endif %} text-orange-500 font-bold{% endif %}">
+        {{ entry.expense.d_a }}
+      </td>
+      {% if entry.expense.toll_parking %}
+      <td
+        class="{% if entry.changes.toll_parking %} {% if approved.approved %}content{% endif %} text-orange-500 font-bold{% endif %}">
+        {{ entry.expense.toll_parking }}
+      </td>
+      {% else %}
+      <td>0</td>
+      {% endif %}
+      <td
+        class="{% if entry.changes.other_expenses %} {% if approved.approved %}content{% endif %} text-orange-500 font-bold{% endif %}">
+        {{ entry.expense.other_expenses }}
+      </td>
+      <td
+        class="{% if entry.changes.daily_cost %} {% if approved.approved %}content{% endif %} text-orange-500 font-bold{% endif %}"
+        style="font-weight: 600;">
+        {{ entry.expense.daily_cost }}
+      </td>
+    </tr>
+
+    {% endfor %}
+    <tr>
+      <th scope="col">Total</th>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td style="font-weight: bold;opacity: 95%;padding:5px 0;">{% sum_field expenses 'daily_km' %} KM</td>
+      <td style="font-weight: bold;opacity: 95%;padding:5px 0;">{% sum_field expenses 'ticket' %}</td>
+      <td style="font-weight: bold;opacity: 95%;padding:5px 0;">{% sum_field expenses 'lodging_boarding' %}</td>
+      <td style="font-weight: bold;opacity: 95%;padding:5px 0;">{% sum_field expenses 'd_a' %}</td>
+      <td style="font-weight: bold;opacity: 95%;padding:5px 0;">{% sum_field expenses 'toll_parkking' %}</td>
+      <td style="font-weight: bold;opacity: 95%;padding:5px 0;">{% sum_field expenses 'other_expenses' %}</td>
+      <td style="font-weight: bold;opacity: 95%;padding:5px 0;">{% sum_field expenses 'daily_cost' %}</td>
+    </tr>
+  </tbody>
+</table>
+<p style="font-weight: bold ; font-size: larger;">Total Cost={{ total_cost }}</p></br>
+{% if approved.approved %}
+<p>Remarks: {{approved.remark}}</p></br>
+{% endif %}
+
+<p style="text-align: center;display: flex;justify-content: space-between;"><span>Employee Sign:
+    Approved </span>
+  &nbsp;&nbsp;
+  <span>HOD Sign:&nbsp;{% if approved.approved %}Approved
+    {% else %}&nbsp;__________________ {% endif %}</span>
+
+  <span>Vehicle Incharge: ________________</span>
+  <span>Approved by:{% if approved.approved %}&nbsp;{{approved.approved_by.first_name}}
+    {{approved.approved_by.last_name}}{% else %}&nbsp;__________________{% endif %}</span>
+  <span>Acc Sign: __________________</span>
+</p>
+<form action="{% url 'pdf' %}" method="get" style="width: 100%;text-align: center;margin-top: 50px;">
+  <input type="hidden" name="user" value="{{employeeData.id}}">
+  <input type="hidden" name="month" value="{{month}}">
+  <input type="hidden" name="year" value="{{year}}">
+  <button type="submit" class="btn btn-outline-primary "><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+      fill="currentColor" class="bi bi-file-earmark-arrow-down-fill" viewBox="0 0 16 16">
+      <path
+        d="M9.293 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V4.707A1 1 0 0 0 13.707 4L10 .293A1 1 0 0 0 9.293 0M9.5 3.5v-2l3 3h-2a1 1 0 0 1-1-1m-1 4v3.793l1.146-1.147a.5.5 0 0 1 .708.708l-2 2a.5.5 0 0 1-.708 0l-2-2a.5.5 0 0 1 .708-.708L7.5 11.293V7.5a.5.5 0 0 1 1 0" />
+    </svg><span>Download PDF</span></button>
+</form>
+
 </br>
+{% endblock body %}
+{% block scripts %}
+<script>
+  document.getElementById('monthInput').addEventListener('change', function () {
+    var selectedDate = this.value; // Format: YYYY-MM
+    if (selectedDate) {
+      var parts = selectedDate.split('-');
+      var year = parts[0];
+      var month = parts[1];
+
+
+      var baseUrl = `{% url 'total_cost' %}?month=${month}&${year}`; // Get the base URL up to the first '0'
+      window.location.href = baseUrl;
+    }
+  });
+</script>
+{% endblock scripts %}

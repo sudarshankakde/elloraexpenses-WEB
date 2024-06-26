@@ -18,7 +18,7 @@ urlpatterns = [
     path('punchOutRequest_api', logicView.punchOutRequest_api, name='punchOutRequest_api'),
     path('attendanceApi', views.attendanceApi, name='attendanceApi'),
     path('expensesApi', views.expensesApi, name='expensesApi'),
-    path('dowloadExpensesPdf', views.dowloadExpensesPdf, name='dowloadExpensesPdf'),
+    path('dowloadExpensesPdf', views.download_expenses_pdf, name='dowloadExpensesPdf'),
 
     # apk updates
     path('download_apk', views.download_apk, name='download-apk'),

@@ -1,94 +1,219 @@
 <!DOCTYPE html>
 <html>
-<head><meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta charset="utf-8">
+  {% load templatetags %}
+
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta charset="utf-8" />
     <title>Ellora Natural Seeds Pvt. Ltd.</title>
     <style>
-        @page {
-            size: landscape;
-        }
-        body {
-            font-family: Arial, sans-serif;
+      @page {
+        size: landscape;
+      }
 
-        }
-        h1 {
-            text-align: center;
-            margin-top: 50px;
-            
-        }
-        table {
-            width: 90%;
-            table-layout: active;
-            border-collapse: collapse;
+      body {
+        font-family: Arial, sans-serif;
+      }
 
-        }
-        th, td {
-            border: 1px solid #ddd;
-            padding: 1px;
-            text-align: center;
-        }
-        th.adjustable {
-            width: auto;
-            white-space: nowrap;
-        }
-        h3 {margin: 10px 20px} 
-        p {margin: 10px 20px} 
+      h1 {
+        text-align: center;
+        font-size: xx-large;
+      }
+
+      table {
+        width: 90%;
+        table-layout: auto;
+        border-collapse: collapse;
+        margin: auto;
+      }
+
+      th,
+      td {
+        border: 1px solid #ddd;
+        padding: 8px;
+        text-align: center;
+        max-width: 120px;
+        /* Prevent overflow */
+        word-wrap: break-word;
+      }
+
+      th.adjustable {
+        width: auto;
+        white-space: nowrap;
+      }
+
+      h3 {
+        margin: 10px 20px;
+      }
+
+      p {
+        margin: 10px 20px;
+      }
+
+      .content:before {
+        content: "*";
+      }
+
+      .text-orange-500 {
+        color: #f97316;
+        font-weight: 600;
+      }
+
+      .text-blue {
+        color: #1d4ed8;
+        font-weight: bold;
+      }
     </style>
-</head>
-<body>
-    &nbsp;</br>
-    <h1>Ellora Natural Seeds Pvt. Ltd.</h1>
+  </head>
 
-    <h3>Employee Name : {{ user.first_name }} {{ user.last_name }}</h3>
-    <h3>Emp Id : {{ user.username }}&nbsp;&nbsp;&nbsp;&nbsp; Department : {{ employeeprofile.department }}&nbsp;&nbsp;&nbsp;&nbsp;Designation : {{ employeeprofile.designation }}&nbsp;&nbsp;&nbsp;&nbsp; Vehicle Number : {{ employeeprofile.vehicle_number }}</h3>
+  <body>
+    <br /><br />
+    <h1>Ellora Natural Seeds Pvt. Ltd.</h1>
+    <br /><br />
+    <h3>Employee Name: {{ user.first_name }} {{ user.last_name }}</h3>
+    <h3>
+      Emp Id: {{ user.username }}&nbsp;&nbsp;&nbsp;&nbsp; Department: 
+      {{employeeprofile.department }}&nbsp;&nbsp;&nbsp;&nbsp; Designation: 
+      {{employeeprofile.designation }}&nbsp;&nbsp;&nbsp;&nbsp; Vehicle Number: 
+      {{employeeprofile.vehicle_number }}&nbsp;&nbsp;&nbsp;&nbsp; Expenses Of: 
+      {{approved.approved_For_Month_Year|date:"M,Y" }}
+    </h3>
 
     <table>
-        <colgroup>
-            <col>
-            <col class="adjustable">
-        </colgroup>
-        <thead>
-            <tr>
-                <th scope="col">Date</th>
-                <th scope="col">Vehicle Type</th>
-                <th scope="col">Opening KM</th>
-                <th scope="col">Closing KM</th>
-                <th scope="col">From</th>
-                <th scope="col">To</th>
-                <th scope="col">Daily KM</th>
-                <th scope="col">Ticket</th>
-                <th scope="col">Loadging/Boarding </th>
-                <th scope="col">DA</th>
-                <th scope="col">Amount</th>
-              </tr>
-        </thead>
-        <tbody>
-            {% for entry in total %}
-            <tr>
-                <th scope="row">{{ entry.date  }}</th>
-                <td>{{ entry.vehicle_type }}</td>
-                <td>{{ entry.morning_reading }}</td>
-                <td>{{ entry.evening_reading }}</td>
-                <td>{{ entry.punchin_from }} To {{ entry.punchin_to }}</td>
-                <td>{{ entry.punchout_from }} To {{ entry.punchout_to }}</td>
-                <td>{{ entry.daily_km }}</td>
-                <td>{{ entry.ticket }}</td>
-                <td>{{ entry.lodging_boarding }}</td>
-                <td>{{ entry.d_a }}</td>
-                <td>{{ entry.daily_cost }}</td>
-              </tr>
-            {% endfor %}
-        </tbody>
-        <tfoot>
-            <tr>
-                <th>Total Cost</th>
-                <td>{{ total_cost }}</td>
-            </tr>
-        </tfoot>
-    </table></br>
-    <p>Remarks:</p>
-    &nbsp;</br>
-    <p>Employee Sign: _______________________&nbsp; HOD Sign: __________________________ &nbsp; Vehicle Incharge: ________________________ &nbsp;Approved by: ___________________________ &nbsp;Acc Sign: _________________________</p>
-</body>
+      <colgroup>
+        <col />
+        <col class="adjustable" />
+      </colgroup>
+      <thead>
+        <tr>
+          <th scope="col">Date</th>
+          <th scope="col">Vehicle Type</th>
+          <th scope="col">Opening KM</th>
+          <th scope="col">Closing KM</th>
+          <th scope="col">From</th>
+          <th scope="col">To</th>
+          <th scope="col">Daily KM</th>
+          <th scope="col">Ticket</th>
+          <th scope="col">Lodging/<br />Boarding</th>
+          <th scope="col">DA</th>
+          <th scope="col">Toll/Fastag<br />/Parking</th>
+          <th scope="col">Other Expenses</th>
+          <th scope="col">Amount</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for entry in total %}
+        <tr>
+          <td>{{ entry.expense.date }}</td>
+          <td>{{ entry.expense.vehicle_type }}</td>
+          <td>{{ entry.expense.morning_reading }}</td>
+          <td>{{ entry.expense.evening_reading }}</td>
+          <td>
+            {{ entry.expense.punchin_from }} To {{ entry.expense.punchin_to }}
+          </td>
+          <td>
+            {{ entry.expense.punchout_from }} To {{ entry.expense.punchout_to }}
+          </td>
+          <td>{{ entry.expense.daily_km }}</td>
+          <td
+            class="{% if entry.changes.ticket %} {% if approved.approved %}content{% endif %} text-orange-500 font-bold{% endif %}"
+          >
+            {{ entry.expense.ticket }}
+          </td>
+          <td
+            class="{% if entry.changes.lodging_boarding %} {% if approved.approved %}content{% endif %} text-orange-500 font-bold{% endif %}"
+          >
+            {{ entry.expense.lodging_boarding }}
+          </td>
+          <td
+            class="{% if entry.changes.d_a %} {% if approved.approved %}content{% endif %} text-orange-500 font-bold{% endif %}"
+          >
+            {{ entry.expense.d_a }}
+          </td>
+          {% if entry.expense.toll_parking %}
+          <td
+            class="{% if entry.changes.toll_parking %} {% if approved.approved %}content{% endif %} text-orange-500 font-bold{% endif %}"
+          >
+            {{ entry.expense.toll_parking }}
+          </td>
+          {% else %}
+          <td>0</td>
+          {% endif %}
+          <td
+            class="{% if entry.changes.other_expenses %} {% if approved.approved %}content{% endif %} text-orange-500 font-bold{% endif %}"
+          >
+            {{ entry.expense.other_expenses }}
+          </td>
+          <td
+            class="{% if entry.changes.daily_cost %} {% if approved.approved %}content{% endif %} text-orange-500 font-bold{% endif %}" style="font-weight: 600;"
+          >
+          {{ entry.expense.daily_cost }}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+      <tfoot>
+        <tr>
+          <td style="font-weight: bold; opacity: 95%; padding: 5px 0">
+            Total Cost
+          </td>
+          <td>&nbsp;</td>
+          <td>&nbsp;</td>
+          <td>&nbsp;</td>
+          <td>&nbsp;</td>
+          <td>&nbsp;</td>
+          <td style="font-weight: bold; opacity: 95%; padding: 5px 0">
+            {% sum_field total 'daily_km' %} KM
+          </td>
+          <td style="font-weight: bold; opacity: 95%; padding: 5px 0">
+            {% sum_field total 'ticket' %}
+          </td>
+          <td style="font-weight: bold; opacity: 95%; padding: 5px 0">
+            {% sum_field total 'lodging_boarding' %}
+          </td>
+          <td style="font-weight: bold; opacity: 95%; padding: 5px 0">
+            {% sum_field total 'd_a' %}
+          </td>
+          <td style="font-weight: bold; opacity: 95%; padding: 5px 0">
+            {% sum_field total 'toll_parking' %}
+          </td>
+          <td style="font-weight: bold; opacity: 95%; padding: 5px 0">
+            {% sum_field total 'other_expenses' %}
+          </td>
+          {% if approved %}
+          <td style="font-weight: bold; opacity: 95%; padding: 5px 0">
+            {{ approved.total_expense_allocated }}
+          </td>
+          {% else %}
+          <td style="font-weight: bold; opacity: 95%; padding: 5px 0">
+            {{ total_cost }}
+          </td>
+          {% endif %}
+        </tr>
+      </tfoot>
+    </table>
+    <br/>
+    <p>
+      Remarks: {% if approved.approved %} {{approved.remark}} {% else %} {% endif %}
+    </p>
+    <br />
+    <p>
+      <span>Employee Sign: <span class="text-blue">Approved</span></span> &nbsp;
+      &nbsp;&nbsp;&nbsp;
+      <span
+        >HOD Sign:&nbsp; {% if approved.approved %}
+        <span class="text-blue">Approved</span>
+        {% else %} __________________________ {% endif %} </span
+      >&nbsp;&nbsp;&nbsp;&nbsp;
+      <span>Vehicle Incharge: ________________________</span>&nbsp;&nbsp;&nbsp;&nbsp;
+      <span
+        >Approved by: &nbsp; {% if approved.approved %}
+        <span class="text-blue"
+          >{{ approved.approved_by.first_name }} 
+          {{approved.approved_by.last_name }}</span>
+        {% else %} __________________________ {% endif %} </span
+      >&nbsp;&nbsp;&nbsp;&nbsp; <span>Acc Sign: _________________________</span>&nbsp;&nbsp;
+    </p>
+  </body>
 </html>

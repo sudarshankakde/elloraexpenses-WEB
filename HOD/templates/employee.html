@@ -1,0 +1,343 @@
+{% extends "hodBase.html" %}
+{% load templatetags %}
+
+{% block body %}
+<div class="bg-red-200 py-2 sticky top-0  text-center">
+  Once changed amount can't be revoked. Please be conscious
+</div>
+<div class="text-center w-[90%] mx-auto my-5">
+  <div class="flex flex-row justify-between items-center py-3">
+    <h3 class="text-xl  font-normal tracking-wide ">Employee Name :
+      <span class="font-semibold">{{ employeeData.first_name }} {{ employeeData.last_name }}</span>
+    </h3>
+    <div>
+      <label for="month" class="font-semibold tracking-wide">Change Expenses Month</label>
+      <input type="month" id="monthInput" class="rounded-lg" value="{{year}}-{{month}}" max="{% now 'Y-m' %}"
+        min="2024-01">
+    </div>
+    <div class="flex flex-row  gap-2">
+      <form action="{% url 'pdf' %}"  method="get">
+        <input type="hidden" name="user" value="{{employeeData.id}}">
+        <input type="hidden" name="month" value="{{month}}">
+        <input type="hidden" name="year" value="{{year}}">
+        <button type="submit"
+          class="border border-1 rounded-md p-2 px-4 bg-green-500 text-white flex flex-row justify-center items-center gap-2 capitalize hover:bg-green-600"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-file-earmark-arrow-down-fill" viewBox="0 0 16 16">
+            <path d="M9.293 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V4.707A1 1 0 0 0 13.707 4L10 .293A1 1 0 0 0 9.293 0M9.5 3.5v-2l3 3h-2a1 1 0 0 1-1-1m-1 4v3.793l1.146-1.147a.5.5 0 0 1 .708.708l-2 2a.5.5 0 0 1-.708 0l-2-2a.5.5 0 0 1 .708-.708L7.5 11.293V7.5a.5.5 0 0 1 1 0"/>
+          </svg><span>Download PDF</span></button>
+      </form>
+      {% if approved.approved%}
+      <form action="{% url 'hod:edit_application' %}" id="editForm" method="get">
+        <input type="hidden" name="applicationId" value="{{approved.id}}">
+        <button type="button" onclick="handleEditSubmission()"
+          class="border border-1 rounded-md p-2 px-4 bg-red-400 text-white flex flex-row justify-center items-center gap-2 capitalize hover:bg-red-500"><svg
+            xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-fill"
+            viewBox="0 0 16 16">
+            <path
+              d="M12.854.146a.5.5 0 0 0-.707 0L10.5 1.793 14.207 5.5l1.647-1.646a.5.5 0 0 0 0-.708zm.646 6.061L9.793 2.5 3.293 9H3.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.207zm-7.468 7.468A.5.5 0 0 1 6 13.5V13h-.5a.5.5 0 0 1-.5-.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.5-.5V10h-.5a.5.5 0 0 1-.175-.032l-.179.178a.5.5 0 0 0-.11.168l-2 5a.5.5 0 0 0 .65.65l5-2a.5.5 0 0 0 .168-.11z" />
+          </svg> <span>edit expenses </span></button>
+      </form>
+      {% endif %}
+    </div>
+
+  </div>
+  <hr>
+
+</div>
+
+<div class="w-[90%] mx-auto container">
+  <div class="flex flex-row tracking-wide py-2 justify-between">
+    <p class="font-semibold">Emp Id : <span class="font-normal"> {{ employeeData.username }}</span></p>
+    <p class="font-semibold">Department: <span class="font-normal"> {{ employeeprofile.department }}</span></p>
+    <p class="font-semibold">Designation : <span class="font-normal"> {{ employeeprofile.designation }}</span></p>
+    <p class="font-semibold">Vehicle Number : <span class="font-normal"> {{ employeeprofile.vehicle_number }}</span></p>
+  </div>
+  <p class=" py-1">Expenses Period : {{month}}/{{year}}</p>
+  <table class="table-auto w-full text-center border border-2 border-gray-700 border-collapse border-spacing-1">
+    <thead>
+      <tr>
+        <th class="p-2.5 border border-slate-500 bg-blue-200">Date</th>
+        <th class="p-2.5 border border-slate-500 bg-blue-200">Vehicle Type</th>
+        <th class="p-2.5 border border-slate-500 bg-blue-200">Opening KM</th>
+        <th class="p-2.5 border border-slate-500 bg-blue-200">Closing KM</th>
+        <th class="p-2.5 border border-slate-500 bg-blue-200">From</th>
+        <th class="p-2.5 border border-slate-500 bg-blue-200">To</th>
+        <th class="p-2.5 border border-slate-500 bg-blue-200">Daily KM</th>
+        <th class="p-2.5 border border-slate-500 bg-blue-200">Ticket</th>
+        <th class="p-2.5 border border-slate-500 bg-blue-200">Loadging/ <br>Boarding </th>
+        <th class="p-2.5 border border-slate-500 bg-blue-200">DA</th>
+        <th class="p-2.5 border border-slate-500 bg-blue-200">Toll/ Fastag/<br>Parking</th>
+        <th class="p-2.5 border border-slate-500 bg-blue-200">Other <br> Expenses</th>
+        <th class="p-2.5 border border-slate-500 bg-blue-200">Amount</th>
+        {% if approved.approved%}
+        {% else %}
+        <th class="p-2.5 border border-slate-500 bg-blue-200">Action</th>
+        {% endif %}
+      </tr>
+    </thead>
+    <tbody>
+      {% for entry in expenses %}
+      
+      <tr>
+        <th class="border border-slate-500 p-1 ">{{ entry.expense.date }}</th>
+        <td class="border border-slate-500 p-1 ">{{ entry.expense.vehicle_type }}</td>
+        <td class="border border-slate-500 p-1 {% if entry.changes.morning_reading %}before:content-['*_'] text-orange-500 font-bold{% endif %}">{{ entry.expense.morning_reading }}</td>
+        <td class="border border-slate-500 p-1 {% if entry.changes.evening_reading %}before:content-['*_'] text-orange-500 font-bold{% endif %}">{{ entry.expense.evening_reading }}</td>
+        <td class="border border-slate-500 p-1 ">{{ entry.expense.punchin_from }} To {{ entry.expense.punchin_to }}</td>
+        <td class="border border-slate-500 p-1 ">{{ entry.expense.punchout_from }} To {{ entry.expense.punchout_to }}</td>
+        <td class="border border-slate-500 p-1 {% if entry.changes.daily_km %}before:content-['*_'] text-orange-500 font-bold{% endif %}">{{ entry.expense.daily_km }}</td>
+      
+       
+        <td class="border border-slate-500 p-1 {% if entry.changes.ticket %}{% if approved.approved %}before:content-['*_']
+        {% endif %} text-orange-500 font-bold{% endif %}">
+          {% if approved.approved %}
+            {{ entry.expense.ticket }}
+          {% else %}
+            <input type="number" class="w-auto max-w-[75px] text-center" name="entry_tk_{{ entry.expense.id }}" 
+                   hx-get="{% url 'hod:change_values' entry.expense.id 'tk' %}" 
+                   hx-trigger="keyup changed delay:500ms" 
+                   hx-target="#entry_amount_{{ entry.expense.id }}" 
+                   hx-swap="innerHTML" 
+                   value="{{ entry.expense.ticket }}" 
+                   hx-indicator="#TotalIndicator" 
+                   id="entry_tk_{{ entry.expense.id }}" />
+          {% endif %}
+        </td>
+        <td class="border border-slate-500 p-1 {% if entry.changes.lodging_boarding %}{% if approved.approved %}before:content-['*_']
+        {% endif %} text-orange-500 font-bold{% endif %}">
+          {% if approved.approved %}
+            {{ entry.expense.lodging_boarding }}
+          {% else %}
+            <input type="number" class="w-auto max-w-[75px] text-center" name="entry_lb_{{ entry.expense.id }}" 
+                   hx-get="{% url 'hod:change_values' entry.expense.id 'lb' %}" 
+                   hx-trigger="keyup changed delay:500ms" 
+                   hx-target="#entry_amount_{{ entry.expense.id }}" 
+                   hx-swap="innerHTML" 
+                   value="{{ entry.expense.lodging_boarding }}" 
+                   hx-indicator="#TotalIndicator" 
+                   id="entry_lb_{{ entry.expense.id }}" />
+          {% endif %}
+        </td>
+        <td class="border border-slate-500 p-1 {% if entry.changes.d_a %}{% if approved.approved %}before:content-['*_']
+        {% endif %} text-orange-500 font-bold{% endif %}">
+          {% if approved.approved %}
+            {{ entry.expense.d_a }}
+          {% else %}
+            <input type="number" class="w-auto max-w-[75px] text-center" name="entry_da_{{ entry.expense.id }}" 
+                   hx-get="{% url 'hod:change_values' entry.expense.id 'da' %}" 
+                   hx-trigger="keyup changed delay:500ms" 
+                   hx-target="#entry_amount_{{ entry.expense.id }}" 
+                   hx-swap="innerHTML" 
+                   value="{{ entry.expense.d_a }}" 
+                   hx-indicator="#TotalIndicator" 
+                   id="entry_da_{{ entry.expense.id }}" />
+          {% endif %}
+        </td>
+        <td class="border border-slate-500 p-1 {% if entry.changes.toll_parkking %}{% if approved.approved %}before:content-['*_']
+          
+        {% endif %} text-orange-500 font-bold{% endif %}">
+          {% if approved.approved %}
+            {{ entry.expense.toll_parkking }}
+          {% else %}
+            <input type="number" class="w-auto max-w-[75px] text-center" name="entry_tp_{{ entry.expense.id }}" 
+                   hx-get="{% url 'hod:change_values' entry.expense.id 'tp' %}" 
+                   hx-trigger="keyup changed delay:500ms" 
+                   hx-target="#entry_amount_{{ entry.expense.id }}" 
+                   hx-swap="innerHTML" 
+                   value="{{ entry.expense.toll_parkking }}" 
+                   hx-indicator="#TotalIndicator" 
+                   id="entry_tp_{{ entry.expense.id }}" />
+          {% endif %}
+        </td>
+        <td class="border border-slate-500 p-1 {% if entry.changes.other_expenses %}{% if approved.approved %}before:content-['*_']
+          
+        {% endif %} text-orange-500 font-bold{% endif %}">
+          {% if approved.approved %}
+            {{ entry.expense.other_expenses }}
+          {% else %}
+            <input type="number" class="w-auto max-w-[75px] text-center" name="entry_oe_{{ entry.expense.id }}" 
+                   hx-get="{% url 'hod:change_values' entry.expense.id 'oe' %}" 
+                   hx-trigger="keyup changed delay:500ms" 
+                   hx-target="#entry_amount_{{ entry.expense.id }}" 
+                   hx-swap="innerHTML" 
+                   value="{{ entry.expense.other_expenses }}" 
+                   hx-indicator="#TotalIndicator" 
+                   id="entry_oe_{{ entry.expense.id }}" />
+          {% endif %}
+        </td>
+        
+        <td class="border border-slate-500 p-1 {% if entry.changes.daily_cost %} {% if approved.approved %}before:content-['*_']
+          
+        {% endif %} text-orange-500 font-bold{% endif %} bg-gray-200">
+          {% if approved.approved %}
+            {{ entry.expense.daily_cost }}
+          {% else %}
+            <input type="number" class="w-[125px] text-center" name="amount{{ entry.expense.id }}" 
+                   hx-get="{% url 'hod:change_amount' entry.expense.id %}" 
+                   hx-trigger="keyup changed delay:500ms" 
+                   hx-target="#total_cost" 
+                   hx-swap="innerHTML" 
+                   value="{{ entry.expense.daily_cost }}" 
+                   hx-indicator="#TotalIndicator" 
+                   id="entry_amount_{{ entry.expense.id }}" />
+          {% endif %}
+        </td>
+        
+        {% if approved.approved%}
+        {% else %}
+        <td class="border border-slate-500 p-1" id="entry_{{entry.expense.id}}">
+          <form id="deleteForm-{{ entry.expense.id }}" action="{% url 'hod:delete_expense' entry.expense.id %}" method="get">
+            <button type="button" onclick="handleDeleteSubmission('{{ entry.expense.id }}')" class="text-red-600">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
+                <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z"/>
+                <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z"/>
+              </svg>
+            </button>
+          </form>
+          
+        </td>
+        {% endif %}
+      </tr>
+      {% endfor %}
+    </tbody>
+    <tfoot>
+      <tr>
+        <td class="border p-2.5 border-slate-500 p-1 font-bold ">Total Cost</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td class="border border-slate-500 p-1 bg-gray-200 font-semibold" id="total_cost">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+            class="bi bi-arrow-repeat htmx-indicator animate-spin h-5 w-5 mr-3" viewBox="0 0 16 16" id="TotalIndicator">
+            <path
+              d="M11.534 7h3.932a.25.25 0 0 1 .192.41l-1.966 2.36a.25.25 0 0 1-.384 0l-1.966-2.36a.25.25 0 0 1 .192-.41m-11 2h3.932a.25.25 0 0 0 .192-.41L2.692 6.23a.25.25 0 0 0-.384 0L.342 8.59A.25.25 0 0 0 .534 9" />
+            <path fill-rule="evenodd"
+              d="M8 3c-1.552 0-2.94.707-3.857 1.818a.5.5 0 1 1-.771-.636A6.002 6.002 0 0 1 13.917 7H12.9A5 5 0 0 0 8 3M3.1 9a5.002 5.002 0 0 0 8.757 2.182.5.5 0 1 1 .771.636A6.002 6.002 0 0 1 2.083 9z" />
+          </svg>{{ total_cost }}
+        </td>
+      </tr>
+    </tfoot>
+  </table>
+  <div class="flex flex-col gap-y-3">
+    <form action="{% url 'hod:approve_amount' employeeData.id month year %}" method="post">
+      {% csrf_token %}
+
+
+      <p class="my-3  flex flex-col items-start"><span>Remarks :</span>
+        {% if approved.approved or total_cost is None or total_cost == 0 %}
+
+        <span class="h-[100px] border  w-full p-2 rounded-md ">
+          {{approved.remark}}
+        </span>
+        {% else %} <textarea name="remark" id="" class="w-full rounded-md h-[100px]">{{approved.remark}} </textarea>{% endif %}
+      </p>
+
+      <p class="flex flex-row justify-between"> <span>Employee Sign: <span
+        class="text-blue-700 font-semibold  tracking-wider ">Approved</span></span>
+
+        {% if approved.approved%}
+        <span>HOD Sign: <span
+            class="text-blue-700 font-semibold  tracking-wider ">Approved</span></span>
+        {% else %}
+        <span>HOD Sign: __________________________</span>
+        {% endif %}
+
+        <span>Vehicle Incharge: ________________________</span>
+        <!-- <span class="underline tracking-wider underline-offset-2 font-semibold"> {{user.first_name}} {{user.last_name}}</span> -->
+        {% if approved.approved %}
+
+        <span>Approved by: <span class="text-blue-700 font-semibold  tracking-wider ">{{approved.approved_by.first_name}} {{approved.approved_by.last_name}}</span></span>
+        {% else %}
+        <span>Approved by: ________________________</span>
+        {% endif %}
+
+        <span>Acc Sign: ________________________</span>
+      </p>
+      {% if approved.approved%}
+      <div class=""></div>
+      {% else %}
+      {% if total_cost is None or total_cost == 0 %}
+      <div class=""></div>
+      {% else %}
+      <div class="w-full justify-center flex">
+        <button type="submit"
+          class="border-0 mx-auto mt-8 bg-green-400 text-blue-900 text-xl rounded-md py-2 px-5 font-bold my-5 w-fit mx-auto">Approve
+        </button>
+      </div>
+      {% endif %}
+      {% endif %}
+    </form>
+  </div>
+</div>
+{% endblock body %}
+
+{% block script %}
+<!-- SweetAlert2 CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+<!-- SweetAlert2 JS -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+  document.getElementById('monthInput').addEventListener('change', function () {
+    var selectedDate = this.value; // Format: YYYY-MM
+    if (selectedDate) {
+      var parts = selectedDate.split('-');
+      var year = parts[0];
+      var month = parts[1];
+      var userId = "{{ employeeData.id }}";
+
+      var baseUrl = `{% url 'hod:view_employee' employeeData.id %}?month=${month}&year=${year}`  ; // Get the base URL up to the first '0'
+      window.location.href = baseUrl;
+    }
+  });
+  function handleEditSubmission() {
+    Swal.fire({
+      title: 'Are you sure',
+      text: "This will lead to unapproval of the application. Do you want to edit this expense anyway? ",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, edit it!'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        document.getElementById('editForm').submit();
+      }
+    });
+  }
+  function handleDeleteSubmission(entryId) {
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "Once deleted then you won't be able to revert this again!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, Delete It!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                document.getElementById(`deleteForm-${entryId}`).submit();
+            }
+        });
+    }
+    document.addEventListener('htmx:afterSwap', function(event) {
+      const targetId = event.detail.target.id;
+      if (targetId && targetId.startsWith('entry_amount_')) {
+        const elementToUpdate = document.getElementById(targetId);
+        if (elementToUpdate) {
+          const response = JSON.parse(event.detail.xhr.responseText);
+          elementToUpdate.value =response['amount'];
+          document.getElementById('total_cost').innerHTML =response['total_cost'];
+        }
+      }
+    });
+  
+      
+</script>
+{% endblock script %}

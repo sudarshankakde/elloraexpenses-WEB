@@ -146,7 +146,7 @@ def profile(request):
         user = request.user
         user_profile = EmployeeProfile.objects.get(user=user)
     except EmployeeProfile.DoesNotExist:
-        return render(request, 'base.html')
+        return render(request, 'profile.html',{'user_profile': False})
     return render(request, 'profile.html', {'user': user, 'user_profile': user_profile})
 
 @login_required
@@ -226,26 +226,41 @@ from datetime import datetime
 
 @login_required
 def total_expense(request):
-    user = request.user
-    current_month = datetime.now().month
-    total=Total_Expense.objects.filter(user=user).order_by('date')
-    punchin=Punch_In.objects.filter(user=user).order_by('date')
-    punchout=Punch_Out.objects.filter(user=user).order_by('date')
-    employeeprofile=EmployeeProfile.objects.filter(user=user)
-    paginator = Paginator(total,31)  # Show 10 expenses per page
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
-    # Calculate the sum of total_cost for the current page
-    total_cost_current_page = page_obj.object_list.aggregate(total=Sum('daily_cost'))['total']
-
-
-    return render(request, 'daily_credits.html', {
-        'page_obj': page_obj,
-        'punchin':punchin,
-        'punchout':punchout,
-        'total_cost': total_cost_current_page,
-        'employeeprofile':employeeprofile,
-    })
+    if request.method == "GET":
+      month=request.GET.get('month') or datetime.now().month
+      year=request.GET.get('year') or datetime.now().year
+      userInstance = get_object_or_404(User,id=request.user.id)
+      punchin=Punch_In.objects.filter(user=request.user).order_by('date')
+      punchout=Punch_Out.objects.filter(user=request.user).order_by('date')
+      EmployyeInstance = EmployeeProfile.objects.get(user=userInstance)
+      expenses = Total_Expense.objects.filter(user=userInstance,date__month=month,date__year=year).order_by('date')
+      total_cost_current_page = expenses.aggregate(total=Sum('daily_cost'))['total']
+      approval = Approved_monthly_expenses.objects.filter(employee__id=EmployyeInstance.id, approved_For_Month_Year__month=int(month), approved_For_Month_Year__year=int(year)).first()
+      
+      if approval:
+        approval = approval
+      else:
+        False
+      expenses_with_changes = []
+      for expense in expenses:
+        change_logs = expense.change_logs.all()
+        changes = {log.field_name: log.new_value for log in change_logs}
+        expenses_with_changes.append({
+            'expense': expense,
+            'changes': changes
+        })
+      return render(request,'daily_credits.html',{
+          'expenses': expenses_with_changes,
+          'total_cost': total_cost_current_page,
+          'employeeprofile':EmployyeInstance,
+          'employeeData':userInstance,
+          'month':month,
+          'year':year,
+          'approved':approval or False,
+          'punchin':punchin,
+          'punchout':punchout,
+        
+      })
  
 @login_required
 def attendance(request):
@@ -262,47 +277,86 @@ from django.conf import settings
 import os
 from xhtml2pdf import pisa
 from datetime import datetime
-
+from HOD.models import Approved_monthly_expenses
 @login_required
-def download_pdf(request):
-    # Retrieve data for the total expense report
-    user = request.user
-    current_month = datetime.now().month
-
-    total=Total_Expense.objects.filter(user=user,date__month=current_month).order_by('date')
-    punchin=Punch_In.objects.filter(user=user).order_by('date')
-    punchout=Punch_Out.objects.filter(user=user).order_by('date')
+def download_expenses_pdf(request):
+    if request.GET.get('user'):
+      user = get_object_or_404(User,id=int(request.GET.get('user')))
+    else:
+      user = request.user
+    context = {}
+    month = int(request.GET.get('month') or datetime.now().month)
+    year = int(request.GET.get('year') or datetime.now().year)
+    # Fetch employee profile
     employeeprofile = EmployeeProfile.objects.filter(user=user).first()
-    paginator = Paginator(total,31)  # Show 10 expenses per page
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
-    # Calculate the sum of total_cost for the current page
-    total_cost_current_page = page_obj.object_list.aggregate(total=Sum('daily_cost'))['total']
+    if not employeeprofile:
+        return JsonResponse({'message': 'Employee profile not found.'}, status=404)
 
+    # Fetch punch-in and punch-out records
+    punchin = Punch_In.objects.filter(user=user).order_by('date')
+    punchout = Punch_Out.objects.filter(user=user).order_by('date')
+    
+    # Check for approved expenses
+    approved_model_instance = Approved_monthly_expenses.objects.filter(
+        employee__id=employeeprofile.id,
+        approved_For_Month_Year__month=month,
+        approved_For_Month_Year__year=year
+    ).first()
+
+    if approved_model_instance:
+        total_expenses = approved_model_instance.approvedExpenses.all()
+        total_cost = approved_model_instance.total_expense_allocated
+        context['approved'] = approved_model_instance
+    else:
+        total_expenses = Total_Expense.objects.filter(
+            user=user,
+            date__month=month,
+            date__year=year
+        ).order_by('date')
+        if total_expenses.count() == 0:
+            return JsonResponse({'message': f'No Expenses For {calendar.month_name[month]}.'}, status=404)
+        
+        total_cost = total_expenses.aggregate(total=Sum('daily_cost'))['total']
+        context['approved'] = False
+    # Fetch change logs for each expense
+    expenses_with_changes = []
+    for expense in total_expenses:
+        change_logs = expense.change_logs.all()
+        changes = {log.field_name: log.new_value for log in change_logs}
+        expenses_with_changes.append({
+            'expense': expense,
+            'changes': changes
+        })
+    context.update({
+        'punchin': punchin,
+        'punchout': punchout,
+        'total': expenses_with_changes,
+        'total_cost': total_cost,
+        'employeeprofile': employeeprofile,
+        'user': user
+    })
 
     # Render the PDF template with the data
     template = get_template('total_expense_pdf.html')
-    context = {'total':page_obj,'punchin':punchin,'punchout':punchout,'total_cost':total_cost_current_page,'employeeprofile':employeeprofile,'user': user }
     rendered_html = template.render(context)
-    
-    # Create a PDF file
-    pdf_file = os.path.join(settings.MEDIA_ROOT, 'total_expense_report.pdf')
-    with open(pdf_file, 'w+b') as f:
-        pisa_status = pisa.CreatePDF(rendered_html, dest=f)
-    
-    if pisa_status.err:
-        return HttpResponse('Error generating PDF file')
 
-    # Download the PDF file
-    with open(pdf_file, 'rb') as f:
-        response = HttpResponse(f.read(), content_type='application/pdf')
+    # Create a PDF file
+    pdf_file_path = os.path.join(settings.MEDIA_ROOT, 'total_expense_report.pdf')
+    with open(pdf_file_path, 'w+b') as pdf_file:
+        pisa_status = pisa.CreatePDF(rendered_html, dest=pdf_file)
+
+    if pisa_status.err:
+        return JsonResponse({'message': 'Error while generating PDF file'}, status=500)
+
+    # Serve the PDF file
+    with open(pdf_file_path, 'rb') as pdf_file:
+        response = HttpResponse(pdf_file.read(), content_type='application/pdf')
         response['Content-Disposition'] = 'attachment; filename="total_expense_report.pdf"'
     
-    # Delete the temporary PDF file
-    os.remove(pdf_file)
+    # Clean up the temporary PDF file
+    os.remove(pdf_file_path)
     
     return response
-
 #Api
 from rest_framework import viewsets
 from .models import EmployeeProfile, Punch_In, Punch_Out, Total_Expense, Daily_Attendance
@@ -403,39 +457,6 @@ def expensesApi(request):
         return JsonResponse({'error': str(e)}, status=404)
     return JsonResponse(response_data, safe=False)
 
-@login_required
-def dowloadExpensesPdf(request):
-    user = request.user
-    for_month = int(request.GET.get('month'))
-    punchin=Punch_In.objects.filter(user=user).order_by('date')
-    punchout=Punch_Out.objects.filter(user=user).order_by('date')
-    expense=Total_Expense.objects.filter(user=user,date__month=for_month).order_by('date')
-    
-    if expense.count() == 0:
-        return JsonResponse({'message': f'No Expenses For {calendar.month_name[for_month]}.'},status=404)
-    else:
-        employeeprofile = EmployeeProfile.objects.filter(user=user).first()
-        TotalCost = expense.aggregate(total = Sum('daily_cost'))['total']
-        # Render the PDF template with the data
-        template = get_template('total_expense_pdf.html')
-        context = {'total':expense,'punchin':punchin,'punchout':punchout,'total_cost':TotalCost,'employeeprofile':employeeprofile,'user': user }
-        rendered_html = template.render(context)
-
-        # Create a PDF file
-        pdf_file = os.path.join(settings.MEDIA_ROOT, 'total_expense_report.pdf')
-        with open(pdf_file, 'w+b') as f:
-            pisa_status = pisa.CreatePDF(rendered_html, dest=f)
-
-        if pisa_status.err:
-            return JsonResponse({'message': 'Error while generating PDF file'},status=404)
-        # Download the PDF file
-        with open(pdf_file, 'rb') as f:
-            response = HttpResponse(f.read(), content_type='application/pdf')
-            response['Content-Disposition'] = 'attachment; filename="total_expense_report.pdf"'
-        
-        # Delete the temporary PDF file
-        os.remove(pdf_file)
-        return response
 
 def check_username(request):
     if request.method == 'GET':

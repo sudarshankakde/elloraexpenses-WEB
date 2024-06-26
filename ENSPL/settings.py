@@ -55,6 +55,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'corsheaders.middleware.CorsMiddleware',
+    'HOD.middleware.HODGroupRequiredMiddleware', 
 ]
 
 ROOT_URLCONF = 'ENSPL.urls'

@@ -37,7 +37,7 @@ urlpatterns = [
     path('allin',views.all_punchin,name='allpunchin'),
     path('allout',views.all_punchout,name='allpunchout'),
     path('attendance',views.attendance,name='attendance'),
-    path('pdf',views.download_pdf,name='pdf'),
+    path('pdf',views.download_expenses_pdf,name='pdf'),
 ]
 
 if settings.DEBUG:
