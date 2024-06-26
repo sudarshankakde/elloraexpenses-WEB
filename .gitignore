@@ -1,4 +1,2 @@
 mbdb/
-*.sqlite3
-000-default.conf
 venv/

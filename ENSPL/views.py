@@ -79,21 +79,28 @@ def calculate_daily_cost_and_km(last_punchin, last_punchout):
     daily_km = 0
     daily_cost = 0
 
-    if last_punchin.vehicle_type == '4 wheeler':
-        daily_km = (last_punchout.manual_reading or 0) - (last_punchin.manual_reading or 0)
-        daily_cost = daily_km * 10 + (last_punchout.daily_allounce or 0) + (last_punchout.lodging or 0) + (last_punchin.ticket_amount or 0)
+    if last_punchin:
+        if last_punchin.vehicle_type == '4 wheeler' or last_punchin.vehicle_type == '2 wheeler':
+            daily_km = (last_punchout.manual_reading or 0) - (last_punchin.manual_reading or 0)
 
-    elif last_punchin.vehicle_type == '2 wheeler':
-        daily_km = (last_punchout.manual_reading or 0) - (last_punchin.manual_reading or 0)
-        daily_cost = (daily_km * 3.5) + int(last_punchout.daily_allounce or 0) + int(last_punchout.lodging or 0) + (last_punchout.ticket_amount or 0) + (last_punchin.ticket_amount or 0)
-        
-    elif last_punchin.vehicle_type in ['By Train', 'By Bus', 'By Auto']:
-        daily_km = 0
-        daily_cost = (last_punchout.ticket_amount or 0) + (last_punchout.daily_allounce or 0) + (last_punchout.lodging or 0) + (last_punchin.ticket_amount or 0)
+            if last_punchin.vehicle_type == '4 wheeler':
+                daily_cost = daily_km * 10
+            elif last_punchin.vehicle_type == '2 wheeler':
+                daily_cost = daily_km * 3.5
+
+            daily_cost += (last_punchout.daily_allounce or 0) + (last_punchout.lodging or 0) + (last_punchout.ticket_amount or 0) + (last_punchin.ticket_amount or 0)
+        elif last_punchin.vehicle_type in ['By Train', 'By Bus', 'By Auto']:
+            daily_cost = (last_punchout.ticket_amount or 0) + (last_punchout.daily_allounce or 0) + (last_punchout.lodging or 0) + (last_punchin.ticket_amount or 0)
     
     daily_cost += (last_punchout.toll_parkking or 0) + (last_punchout.other_expenses or 0)
-    
+
     return daily_km, daily_cost
+from django.shortcuts import render, redirect
+from django.http import JsonResponse
+from django.contrib import messages
+from django.db import IntegrityError
+from datetime import date, timedelta
+from ENSApp.models import Punch_Out, Punch_In, Daily_Attendance, Total_Expense
 
 def handle_punch_out(request, form_class, response_type='html'):
     if request.method == 'POST':
@@ -106,9 +113,12 @@ def handle_punch_out(request, form_class, response_type='html'):
             last_punchout_date = last_punchout.date
         else:
             last_punchout_date = todays_date - timedelta(days=1)
-        
-        if form.is_valid():
-            if last_punchout_date != todays_date:
+      
+        # Skip form validation to allow saving even with missing fields
+        # if form.is_valid():
+
+        if last_punchout_date != todays_date:
+            try:
                 punch_out = form.save(commit=False)
                 punch_out.user = request.user
                 punch_out.save()
@@ -123,25 +133,31 @@ def handle_punch_out(request, form_class, response_type='html'):
                 daily_km, daily_cost = calculate_daily_cost_and_km(last_punchin, punch_out)
 
                 try:
-                    total_expense = Total_Expense.objects.create(
+                    total_expense, created = Total_Expense.objects.get_or_create(
                         user=request.user,
                         date=for_date,
-                        daily_km=daily_km or 0,
-                        daily_cost=daily_cost or 0,
-                        vehicle_type=last_punchin.vehicle_type,
-                        punchin_from=last_punchin.from_location,
-                        punchin_to=last_punchin.to_location,
-                        punchout_from=punch_out.from_location,
-                        punchout_to=punch_out.to_location,
-                        morning_reading=last_punchin.manual_reading or 0,
-                        evening_reading=punch_out.manual_reading or 0,
-                        ticket=(punch_out.ticket_amount or 0) + (last_punchin.ticket_amount or 0),
-                        d_a=punch_out.daily_allounce or 0,
-                        lodging_boarding=punch_out.lodging or 0,
-                        toll_parkking=punch_out.toll_parkking or 0,
-                        other_expenses=punch_out.other_expenses or 0
+                        defaults={
+                            'daily_km': daily_km or 0,
+                            'daily_cost': daily_cost or 0,
+                            'vehicle_type': last_punchin.vehicle_type if last_punchin else '',
+                            'punchin_from': last_punchin.from_location if last_punchin else '',
+                            'punchin_to': last_punchin.to_location if last_punchin else '',
+                            'punchout_from': punch_out.from_location,
+                            'punchout_to': punch_out.to_location,
+                            'morning_reading': last_punchin.manual_reading or 0 if last_punchin else 0,
+                            'evening_reading': punch_out.manual_reading or 0,
+                            'ticket': (punch_out.ticket_amount or 0),
+                            'd_a': punch_out.daily_allounce or 0,
+                            'lodging_boarding': punch_out.lodging or 0,
+                            'toll_parkking': punch_out.toll_parkking or 0,
+                            'other_expenses': punch_out.other_expenses or 0
+                        }
                     )
-                    total_expense.save()
+                    if not created:
+                        total_expense.daily_km = daily_km or 0
+                        total_expense.daily_cost = daily_cost or 0
+                        total_expense.save()
+                
                 except IntegrityError:
                     total_expense = Total_Expense.objects.get(user=request.user, date=for_date)
                     total_expense.save()
@@ -151,12 +167,18 @@ def handle_punch_out(request, form_class, response_type='html'):
                     return redirect('punch_out')
                 else:
                     return JsonResponse({'message': 'Punch Out Saved!'}, status=201)
-            else:
+            except ValueError as e:
                 if response_type == 'html':
-                    messages.success(request, f'Punch Out For {todays_date} Already Exists.')
+                    messages.error(request, f'Error saving Punch Out: {str(e)}')
                     return redirect('punch_out')
                 else:
-                    return JsonResponse({'message': f'Punch Out For {todays_date} Already Exists.'}, status=406)
+                    return JsonResponse({'error': f'Error saving Punch Out: {str(e)}'}, status=400)
+        else:
+            if response_type == 'html':
+                messages.success(request, f'Punch Out For {todays_date} Already Exists.')
+                return redirect('punch_out')
+            else:
+                return JsonResponse({'message': f'Punch Out For {todays_date} Already Exists.'}, status=406)
     
     if response_type == 'html':
         form = form_class()

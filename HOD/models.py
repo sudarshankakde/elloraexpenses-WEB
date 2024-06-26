@@ -32,25 +32,33 @@ class ExpenseChangeLog(models.Model):
 
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
+from .models import Total_Expense, ExpenseChangeLog
+
 @receiver(pre_save, sender=Total_Expense)
 def track_expense_changes(sender, instance, **kwargs):
-    if not instance.pk:
-        return  # If this is a new instance, no changes to track
+    try:
+        old_instance = Total_Expense.objects.get(pk=instance.pk)
+    except Total_Expense.DoesNotExist:
+        # Handle case where old_instance does not exist
+        old_instance = None
+    
+    if old_instance:
+        fields_to_track = [
+            'vehicle_type', 'punchin_from', 'punchin_to', 'punchout_from', 'punchout_to',
+            'morning_reading', 'evening_reading', 'ticket', 'd_a', 'lodging_boarding',
+            'daily_km', 'toll_parking', 'other_expenses', 'daily_cost'
+        ]
 
-    old_instance = Total_Expense.objects.get(pk=instance.pk)
-    fields_to_track = [
-        'vehicle_type', 'punchin_from', 'punchin_to', 'punchout_from', 'punchout_to',
-        'morning_reading', 'evening_reading', 'ticket', 'd_a', 'lodging_boarding',
-        'daily_km', 'toll_parkking', 'other_expenses', 'daily_cost'
-    ]
-
-    for field in fields_to_track:
-        old_value = getattr(old_instance, field)
-        new_value = getattr(instance, field)
-        if old_value != new_value:
-            ExpenseChangeLog.objects.create(
-                expense=instance,
-                field_name=field,
-                old_value=str(old_value),
-                new_value=str(new_value)
-            )
+        for field in fields_to_track:
+            old_value = getattr(old_instance, field)
+            new_value = getattr(instance, field)
+            if old_value != new_value:
+                ExpenseChangeLog.objects.create(
+                    expense=instance,
+                    field_name=field,
+                    old_value=str(old_value),
+                    new_value=str(new_value)
+                )
+    else:
+        # Handle new instance creation or other scenarios
+        pass
