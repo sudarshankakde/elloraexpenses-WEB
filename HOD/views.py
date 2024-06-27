@@ -156,9 +156,9 @@ def change_values(request, expenseId, type):
         (expense.ticket or 0) +
         (expense.d_a or 0) +
         (expense.lodging_boarding or 0) +
-        (expense.daily_km or 0) +
         (expense.toll_parkking or 0) +
-        (expense.other_expenses or 0)
+        (expense.other_expenses or 0)+
+        ( calculate_km_cost(expense.daily_km,expense.vehicle_type) or 0)
   )
   
   # Update the total amount in the expense object
@@ -301,3 +301,19 @@ def delete_expense(request,id):
     deleteExpense.delete()
     messages.add_message(request, messages.SUCCESS, f'''Expense Deleted Successfully!''')
     return redirect(request.META.get('HTTP_REFERER', '/'))
+  
+  
+  
+def calculate_km_cost(daily_km,vehicle_type):
+    if vehicle_type == '4 wheeler' or vehicle_type == '2 wheeler':
+        daily_km = daily_km
+
+        if vehicle_type == '4 wheeler':
+            km_cost = daily_km * 10
+        elif vehicle_type == '2 wheeler':
+            km_cost = daily_km * 3.5
+
+    elif vehicle_type in ['By Train', 'By Bus', 'By Auto']:
+        km_cost = 0
+
+    return  int(km_cost)

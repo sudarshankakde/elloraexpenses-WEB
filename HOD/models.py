@@ -46,7 +46,7 @@ def track_expense_changes(sender, instance, **kwargs):
         fields_to_track = [
             'vehicle_type', 'punchin_from', 'punchin_to', 'punchout_from', 'punchout_to',
             'morning_reading', 'evening_reading', 'ticket', 'd_a', 'lodging_boarding',
-            'daily_km', 'toll_parking', 'other_expenses', 'daily_cost'
+            'daily_km', 'toll_parkking', 'other_expenses', 'daily_cost'
         ]
 
         for field in fields_to_track:
