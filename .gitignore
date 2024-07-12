@@ -14,8 +14,7 @@ __pycache__/
 # If you are using SQLite, the database file should be ignored
 db.sqlite3
 
-# Ignore the local settings file, if any
-local_settings.py
+
 
 # Ignore Django migration files (you might want to keep these in some cases)
 */migrations/*.py
@@ -62,3 +61,5 @@ coverage.xml
 *.sublime-project
 .DS_Store
 mbdb/db.sqlite3
+*.sqlite3
+mbdb/

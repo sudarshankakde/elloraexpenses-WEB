@@ -43,7 +43,6 @@ INSTALLED_APPS = [
     'cloudinary',
     'cloudinary_storage',
     'HOD'
-    # ...
 ]
 
 MIDDLEWARE = [
@@ -55,7 +54,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'corsheaders.middleware.CorsMiddleware',
-    'HOD.middleware.HODGroupRequiredMiddleware', 
+    'HOD.middleware.HODGroupRequiredMiddleware',
 ]
 
 ROOT_URLCONF = 'ENSPL.urls'

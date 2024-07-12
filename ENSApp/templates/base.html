@@ -54,7 +54,7 @@
           <a class="nav-link" href="{% url 'attendance' %}">Attendance</a>
           <a class="nav-link" href="{% url 'total_cost' %}">Expenses</a>
           <a class="nav-link" href="{% url 'logout' %}">LogOut</a>
-          {% if request.user|in_group:"HOD" %}
+          {% if request.user|in_group:"HOD" or request.user|in_group:"vechile_incharge" %}
           <a class="nav-link" href="{% url 'hod:HOD_home' %}">HOD PANEL</a>
           {% endif %}
         </div>

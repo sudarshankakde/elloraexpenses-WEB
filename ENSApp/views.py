@@ -433,10 +433,11 @@ def allPunchOut(request):
 def attendanceApi(request):
     try:
         if(request.method == "GET"):
-            month = request.GET.get('m')
+            month = (request.GET.get('m'))
+            year = (request.GET.get('y') or datetime.now().year)
             user = request.user
             if month:
-                attendance = Daily_Attendance.objects.filter(user=user,date__month=month).order_by('-date','-intime').values()
+                attendance = Daily_Attendance.objects.filter(user=user,date__month=month,date__year=year).order_by('-date','-intime').values()
                 response_data = {'data': list(attendance)}
             else:
                 attendance = Daily_Attendance.objects.filter(user=user).order_by('-date','-intime').values()

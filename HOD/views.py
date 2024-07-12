@@ -9,28 +9,40 @@ import json
 from django.shortcuts import redirect
 from django.contrib import messages
 # Create your views here.
-def employee_expense(request, month=None,year=None, department=""):
-    if month is None or month == '':
-        month = datetime.now().month
-    if year is None or year == '':
-        year = datetime.now().year
-    all_employees = EmployeeProfile.objects.filter(department=department)
-    expenses = []
+def get_employee_expenses(request, month=None, year=None, department='all'):
+    month = month if month else datetime.now().month
+    year = year if year else datetime.now().year
+
+    if department == 'all':
+        all_employees = Approved_monthly_expenses.objects.filter(approved_For_Month_Year=datetime(int(year), int(month), 1)).order_by('approved_on')
+    else:
+        all_employees = EmployeeProfile.objects.filter(department=department)
+
+    employee_expenses = []
 
     for employee in all_employees:
-        emp_for_month = Total_Expense.objects.filter(user=employee.user, date__month=month,date__year=year)
-        if emp_for_month.count() > 0:
-          total_cost = emp_for_month.aggregate(total=Sum('daily_cost'))['total']
-          statusCheck = Approved_monthly_expenses.objects.filter(employee=employee,approved_For_Month_Year=datetime(int(year), int(month), 1),approved=True)
-          # Create expenses instance
-          expenses_instance = {
-              "employee": employee,
-              "total_expense": total_cost or 0,
-              "status": statusCheck.exists() or False,
-          }
-          expenses.append(expenses_instance)
-    print(expenses)
-    return expenses
+        employee_expenses_for_month = Total_Expense.objects.filter(
+            user=employee.user if department != 'all' else employee.employee.user,
+            date__month=month,
+            date__year=year,
+        )
+
+        if employee_expenses_for_month.exists():
+            total_cost = employee_expenses_for_month.aggregate(total=Sum('daily_cost'))['total']
+            status_check = Approved_monthly_expenses.objects.filter(
+                employee=employee if department != 'all' else employee.employee,
+                approved_For_Month_Year=datetime(int(year), int(month), 1),
+                approved=True,
+            ).exists()
+
+            employee_expense = {
+                "employee": employee if department != 'all' else employee.employee,
+                "total_expense": total_cost or 0,
+                "status": status_check,
+            }
+            employee_expenses.append(employee_expense)
+
+    return employee_expenses
 
 @login_required
 def home(request):
@@ -40,6 +52,7 @@ def home(request):
     user = request.user
     try:
         hod_group = Group.objects.get(name="HOD")
+        vechile_incharge_group = Group.objects.get(name="vechile_incharge")
         hod_department = EmployeeProfile.objects.get(user=user).department
         hod_profile = EmployeeProfile.objects.get(user=user)
         if hod_group in user.groups.all():
@@ -53,10 +66,27 @@ def home(request):
                     'designation':hod_profile.designation
                 },
                 'groups': user.groups.all(),
-                'employees': employee_expense(request=request,department=hod_department,month=month,year=year),
+                'employees': get_employee_expenses(request=request,department=hod_department,month=month,year=year),
                 'expensesOF': datetime(int(year), int(month), 1)
             }
             return render(request, 'home.html', context)
+        elif vechile_incharge_group in user.groups.all():
+            context = {
+                'user_info': {
+                    'username': hod_profile.user.username,
+                    'first_name':hod_profile.user.first_name,
+                    'last_name': hod_profile.user.last_name,
+                    'email': hod_profile.user.email,
+                    'department': hod_department,
+                    'designation':hod_profile.designation
+                },
+                'groups': user.groups.all(),
+                'employees': get_employee_expenses(request=request,month=month,year=year),
+                'expensesOF': datetime(int(year), int(month), 1)
+            }
+            return render(request, 'home.html', context)
+        else:
+          HttpResponse("NOT ALLOWEED TO ACCESS! Your Not HOD or Vechile Incharge")
     except Group.DoesNotExist:
         return HttpResponse("Group Does Not Exist")
     else:
@@ -180,7 +210,7 @@ def approve_amount(request, employeeId, month=None, year=None):
     if year is None or year == '':
         year = datetime.now().year
     
-
+    Hod_appoved = request.user.groups.filter(name='HOD').exists()
     userInstance = get_object_or_404(User, id=employeeId)
     employeeInstance = get_object_or_404(EmployeeProfile, user=userInstance)
     expenses = Total_Expense.objects.filter(user=userInstance, date__month=month).order_by('date')
@@ -195,7 +225,12 @@ def approve_amount(request, employeeId, month=None, year=None):
       approved_expense_instance.employee=employeeInstance
       approved_expense_instance.remark=request.POST.get('remark', '')
       approved_expense_instance.total_expense_allocated=total_cost
-      approved_expense_instance.approved=True
+      if Hod_appoved:
+        approved_expense_instance.approved=True
+        approved_expense_instance.vechile_incharge_approved=False
+      else:
+        approved_expense_instance.approved=True
+        approved_expense_instance.vechile_incharge_approved=True
       approved_expense_instance.approved_For_Month_Year=datetime(int(year), int(month), 1)
       approved_expense_instance.save()  # Save for making instace
       # Now set the ManyToMany relationship
@@ -227,7 +262,7 @@ def CheckApprovedStatus(employeeId,approved_For_Month_Year=None):
   userInstance = get_object_or_404(EmployeeProfile, user__id=employeeId)
   return  Approved_monthly_expenses.objects.filter(employee__id=userInstance.id, approved_For_Month_Year__month=int(month), approved_For_Month_Year__year=int(year))
 
-
+from django.db.models import Q
 def view_approved(request):
     if request.method == 'GET':
         employeeId = request.GET.get('employee')
@@ -237,7 +272,7 @@ def view_approved(request):
         # Get the current user
         current_user = request.user
         current_user_profile = get_object_or_404(EmployeeProfile, user=current_user)
-
+        hod_request = request.user.groups.filter(name='HOD').exists()
         # If no employeeId is provided, get all Approved_monthly_expenses for the current month and year
         if not employeeId:
             # Use current month and year if not provided
@@ -245,15 +280,21 @@ def view_approved(request):
                 month = datetime.now().month
             if not year:
                 year = datetime.now().year
-
             approved_For_Month_Year = datetime(int(year), int(month), 1)
-            approved_expenses = Approved_monthly_expenses.objects.filter(
-                employee__department=current_user_profile.department,
-                approved_For_Month_Year__month=int(month),
-                approved_For_Month_Year__year=int(year),
-                approved=True
-            )
-
+            if hod_request:
+              approved_expenses = Approved_monthly_expenses.objects.filter(
+                  employee__department=current_user_profile.department,
+                  approved_For_Month_Year__month=int(month),
+                  approved_For_Month_Year__year=int(year),
+                  approved=True,
+              )
+            else:
+              approved_expenses = Approved_monthly_expenses.objects.filter(
+                  approved_For_Month_Year__month=int(month),
+                  approved_For_Month_Year__year=int(year),
+                  approved=True,
+                  vechile_incharge_approved=True 
+              )
             return render(request, 'approved.html', {
                 'approved_expenses': approved_expenses,
                 'approved_For_Month_Year': approved_For_Month_Year,
@@ -289,7 +330,13 @@ def edit_application(request):
   if request.method == 'GET':
     applicationId = request.GET.get('applicationId')
     approved_monthly_expense = get_object_or_404(Approved_monthly_expenses,id=applicationId)
-    approved_monthly_expense.approved = False
+    Hod_edit = request.user.groups.filter(name='HOD').exists()
+    if Hod_edit:
+      approved_monthly_expense.approved = False
+      approved_monthly_expense.vechile_incharge_approved = False
+      
+    else:
+      approved_monthly_expense.vechile_incharge_approved = False
     approved_monthly_expense.save()
     messages.add_message(request, messages.SUCCESS, f'''You can edit application now!''')
     return redirect(request.META.get('HTTP_REFERER', '/'))

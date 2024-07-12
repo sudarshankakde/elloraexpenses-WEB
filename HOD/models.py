@@ -14,6 +14,7 @@ class Approved_monthly_expenses(models.Model):
     remark = models.CharField(max_length=200,blank=True,null=True)
     total_expense_allocated = models.IntegerField(default=0)
     approved = models.BooleanField(default=True)
+    vechile_incharge_approved = models.BooleanField(default=False)
     approved_For_Month_Year = models.DateField(blank=False,null=False,default=dajngo_datetime)
     def __str__(self):
         return self.employee.user.first_name

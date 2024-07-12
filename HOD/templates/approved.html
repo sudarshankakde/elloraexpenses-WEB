@@ -45,9 +45,15 @@
         </th>
       </tr>
     </thead>
+
     <tbody>
       {% for emp in approved_expenses %}
+      {% if emp.vechile_incharge_approved %}
+      <tr class="bg-green-200">
+      
+      {% else %}
       <tr class="">
+      {% endif %}
         <td class="border border-slate-500 p-1 text-blue-800"><a
             href="{%url 'hod:view_employee' emp.employee.user.id%}?month={{approved_For_Month_Year|date:'m'}}&year{{approved_For_Month_Year|date:'Y'}}">{{ emp.employee.user.username }} </a></td>
         <td class="border border-slate-500 p-1 ">
