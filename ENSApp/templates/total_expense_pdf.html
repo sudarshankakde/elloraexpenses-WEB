@@ -206,7 +206,9 @@
         <span class="text-blue">Approved</span>
         {% else %} __________________________ {% endif %} </span
       >&nbsp;&nbsp;&nbsp;&nbsp;
-      <span>Vehicle Incharge: ________________________</span>&nbsp;&nbsp;&nbsp;&nbsp;
+      <span>Vehicle Incharge:&nbsp; {% if approved.vechile_incharge_approved %}
+        <span class="text-blue">Approved</span>{% else %} __________________________ {% endif %}
+      </span>&nbsp;&nbsp;&nbsp;&nbsp;
       <span
         >Approved by: &nbsp; {% if approved.approved %}
         <span class="text-blue"

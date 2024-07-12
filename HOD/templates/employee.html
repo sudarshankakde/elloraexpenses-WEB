@@ -25,7 +25,8 @@
             <path d="M9.293 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V4.707A1 1 0 0 0 13.707 4L10 .293A1 1 0 0 0 9.293 0M9.5 3.5v-2l3 3h-2a1 1 0 0 1-1-1m-1 4v3.793l1.146-1.147a.5.5 0 0 1 .708.708l-2 2a.5.5 0 0 1-.708 0l-2-2a.5.5 0 0 1 .708-.708L7.5 11.293V7.5a.5.5 0 0 1 1 0"/>
           </svg><span>Download PDF</span></button>
       </form>
-      {% if approved.approved%}
+      
+      {% if approved.approved and request.user|in_group:"HOD" and not approved.vechile_incharge_approved %}
       <form action="{% url 'hod:edit_application' %}" id="editForm" method="get">
         <input type="hidden" name="applicationId" value="{{approved.id}}">
         <button type="button" onclick="handleEditSubmission()"
@@ -68,7 +69,7 @@
         <th class="p-2.5 border border-slate-500 bg-blue-200">Toll/ Fastag/<br>Parking</th>
         <th class="p-2.5 border border-slate-500 bg-blue-200">Other <br> Expenses</th>
         <th class="p-2.5 border border-slate-500 bg-blue-200">Amount</th>
-        {% if approved.approved%}
+        {% if approved.approved and approved.vechile_incharge_approved%}
         {% else %}
         <th class="p-2.5 border border-slate-500 bg-blue-200">Action</th>
         {% endif %}
@@ -87,9 +88,11 @@
         <td class="border border-slate-500 p-1 {% if entry.changes.daily_km %}before:content-['*_'] text-orange-500 font-bold{% endif %}">{{ entry.expense.daily_km }}</td>
       
        
-        <td class="border border-slate-500 p-1 {% if entry.changes.ticket %}{% if approved.approved %}before:content-['*_']
+        <td class="border border-slate-500 p-1 {% if entry.changes.ticket %}{% if approved.approved and approved.vechile_incharge_approved%}before:content-['*_']
         {% endif %} text-orange-500 font-bold{% endif %}">
-          {% if approved.approved %}
+            {% if approved.approved and request.user|in_group:"HOD" %}
+            {{ entry.expense.ticket }}
+            {% elif approved.vechile_incharge_approved %}
             {{ entry.expense.ticket }}
           {% else %}
             <input type="number" class="w-auto max-w-[75px] text-center" name="entry_tk_{{ entry.expense.id }}" 
@@ -102,10 +105,12 @@
                    id="entry_tk_{{ entry.expense.id }}" />
           {% endif %}
         </td>
-        <td class="border border-slate-500 p-1 {% if entry.changes.lodging_boarding %}{% if approved.approved %}before:content-['*_']
+        <td class="border border-slate-500 p-1 {% if entry.changes.lodging_boarding %}{% if approved.approved and approved.vechile_incharge_approved%}before:content-['*_']
         {% endif %} text-orange-500 font-bold{% endif %}">
-          {% if approved.approved %}
-            {{ entry.expense.lodging_boarding }}
+          {% if approved.approved and request.user|in_group:"HOD" %}
+          {{ entry.expense.lodging_boarding }}
+          {% elif approved.vechile_incharge_approved %}
+          {{ entry.expense.lodging_boarding }}
           {% else %}
             <input type="number" class="w-auto max-w-[75px] text-center" name="entry_lb_{{ entry.expense.id }}" 
                    hx-get="{% url 'hod:change_values' entry.expense.id 'lb' %}" 
@@ -117,9 +122,12 @@
                    id="entry_lb_{{ entry.expense.id }}" />
           {% endif %}
         </td>
-        <td class="border border-slate-500 p-1 {% if entry.changes.d_a %}{% if approved.approved %}before:content-['*_']
+        <td class="border border-slate-500 p-1 {% if entry.changes.d_a %}{% if approved.approved and approved.vechile_incharge_approved%}before:content-['*_']
         {% endif %} text-orange-500 font-bold{% endif %}">
-          {% if approved.approved %}
+            
+            {% if approved.approved and request.user|in_group:"HOD" %}
+            {{ entry.expense.d_a }}
+            {% elif approved.vechile_incharge_approved %}
             {{ entry.expense.d_a }}
           {% else %}
             <input type="number" class="w-auto max-w-[75px] text-center" name="entry_da_{{ entry.expense.id }}" 
@@ -132,11 +140,13 @@
                    id="entry_da_{{ entry.expense.id }}" />
           {% endif %}
         </td>
-        <td class="border border-slate-500 p-1 {% if entry.changes.toll_parkking %}{% if approved.approved %}before:content-['*_']
+        <td class="border border-slate-500 p-1 {% if entry.changes.toll_parkking %}{% if approved.approved and approved.vechile_incharge_approved%}before:content-['*_']
           
         {% endif %} text-orange-500 font-bold{% endif %}">
-          {% if approved.approved %}
-            {{ entry.expense.toll_parkking }}
+          {% if approved.approved and request.user|in_group:"HOD" %}
+          {{ entry.expense.toll_parkking }}
+          {% elif approved.vechile_incharge_approved %}
+          {{ entry.expense.toll_parkking }}
           {% else %}
             <input type="number" class="w-auto max-w-[75px] text-center" name="entry_tp_{{ entry.expense.id }}" 
                    hx-get="{% url 'hod:change_values' entry.expense.id 'tp' %}" 
@@ -148,11 +158,13 @@
                    id="entry_tp_{{ entry.expense.id }}" />
           {% endif %}
         </td>
-        <td class="border border-slate-500 p-1 {% if entry.changes.other_expenses %}{% if approved.approved %}before:content-['*_']
+        <td class="border border-slate-500 p-1 {% if entry.changes.other_expenses %}{% if approved.approved and approved.vechile_incharge_approved%}before:content-['*_']
           
         {% endif %} text-orange-500 font-bold{% endif %}">
-          {% if approved.approved %}
-            {{ entry.expense.other_expenses }}
+        {% if approved.approved and request.user|in_group:"HOD" %}
+        {{ entry.expense.other_expenses }}
+        {% elif approved.vechile_incharge_approved %}
+        {{ entry.expense.other_expenses }}
           {% else %}
             <input type="number" class="w-auto max-w-[75px] text-center" name="entry_oe_{{ entry.expense.id }}" 
                    hx-get="{% url 'hod:change_values' entry.expense.id 'oe' %}" 
@@ -165,11 +177,13 @@
           {% endif %}
         </td>
         
-        <td class="border border-slate-500 p-1 {% if entry.changes.daily_cost %} {% if approved.approved %}before:content-['*_']
+        <td class="border border-slate-500 p-1 {% if entry.changes.daily_cost %} {% if approved.approved and approved.vechile_incharge_approved%}before:content-['*_']
           
         {% endif %} text-orange-500 font-bold{% endif %} bg-gray-200">
-          {% if approved.approved %}
-            {{ entry.expense.daily_cost }}
+          {% if approved.approved and request.user|in_group:"HOD" %}
+          {{ entry.expense.daily_cost }}
+          {% elif approved.vechile_incharge_approved %}
+          {{ entry.expense.daily_cost }}
           {% else %}
             <input type="number" class="w-[125px] text-center" name="amount{{ entry.expense.id }}" 
                    hx-get="{% url 'hod:change_amount' entry.expense.id %}" 
@@ -182,7 +196,8 @@
           {% endif %}
         </td>
         
-        {% if approved.approved%}
+        {% if approved.approved and request.user|in_group:"HOD" %}
+        {% elif approved.vechile_incharge_approved %}
         {% else %}
         <td class="border border-slate-500 p-1" id="entry_{{entry.expense.id}}">
           <form id="deleteForm-{{ entry.expense.id }}" action="{% url 'hod:delete_expense' entry.expense.id %}" method="get">
@@ -225,9 +240,10 @@
       </tr>
     </tfoot>
   </table>
-  <div class="flex flex-col gap-y-3">
-    <form action="{% url 'hod:approve_amount' employeeData.id month year %}" method="post">
-      {% csrf_token %}
+  <div class="flex flex-col gap-y-3 mb-24">
+      <form action="{% url 'hod:approve_amount' employeeData.id month year %}" method="post">
+        {% csrf_token %}
+   
 
 
       <p class="my-3  flex flex-col items-start"><span>Remarks :</span>
@@ -248,23 +264,31 @@
         {% else %}
         <span>HOD Sign: __________________________</span>
         {% endif %}
-
+        {% if approved.vechile_incharge_approved %}
+        <span>Vehicle Incharge: <span class="text-blue-700 font-semibold  tracking-wider ">Approved</span></span>
+        
+        {% else %}
         <span>Vehicle Incharge: ________________________</span>
+        {% endif %}
         <!-- <span class="underline tracking-wider underline-offset-2 font-semibold"> {{user.first_name}} {{user.last_name}}</span> -->
         {% if approved.approved %}
 
         <span>Approved by: <span class="text-blue-700 font-semibold  tracking-wider ">{{approved.approved_by.first_name}} {{approved.approved_by.last_name}}</span></span>
+      
         {% else %}
         <span>Approved by: ________________________</span>
         {% endif %}
 
         <span>Acc Sign: ________________________</span>
       </p>
-      {% if approved.approved%}
+      {% if approved.approved and request.user|in_group:"HOD" %}
       <div class=""></div>
+            {% elif approved.vechile_incharge_approved %}
+            <div class=""></div>
       {% else %}
       {% if total_cost is None or total_cost == 0 %}
       <div class=""></div>
+      {% elif not approved.approved and request.user|in_group:"vechile_incharge" %}
       {% else %}
       <div class="w-full justify-center flex">
         <button type="submit"

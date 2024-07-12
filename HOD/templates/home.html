@@ -1,4 +1,7 @@
-{% extends "hodBase.html" %} {% block body %}
+{% extends "hodBase.html" %}
+{% load templatetags %}
+
+{% block body %}
 
 <div class="text-center w-[90%] mx-auto my-5">
   <div class="flex flex-row justify-between items-center py-3">
@@ -31,7 +34,12 @@
 <div class="p-5 container mx-auto border border-blue-100 bg-blue-50 w-[95vw] mt-10">
   
   <div class="my-2 flex flex-row justify-between items-center text-lg capitalize">
+    {% if request.user|in_group:"vechile_incharge" %}
+    <span class="text-2xl font-semibold tracking-wide">All HOD APPROVED APPLICATIONS
+    </span>
+    {% else %}
     <span class="text-2xl font-semibold tracking-wide">Employees in {{user_info.department}} Department
+    {% endif %}
     </span>
     <span> Number of employees: {{employees|length }} </span>
   </div>
@@ -40,6 +48,9 @@
       <tr >
         <th class="border border-slate-500 bg-blue-200 py-3">Emp Id</th>
         <th class="border border-slate-500 bg-blue-200 py-3">Name</th>
+        {% if request.user|in_group:"vechile_incharge" %}
+        <th class="border border-slate-500 bg-blue-200">Department</th>
+        {% endif %}
         <th class="border border-slate-500 bg-blue-200">Designation</th>
         <th class="border border-slate-500 bg-blue-200">Work location</th>
         <th class="border border-slate-500 bg-blue-200">
@@ -49,6 +60,7 @@
         <th class="border border-slate-500 bg-blue-200">Link</th>
       </tr>
     </thead>
+   
     <tbody>
       {% for emp in employees %}
       <tr class="">
@@ -59,6 +71,11 @@
         {{ emp.employee.user.first_name }} {{ emp.employee.user.last_name }}
 
       </td>
+      {% if request.user|in_group:"vechile_incharge" %}
+      <td class="border border-slate-500 p-1">
+        {{ emp.employee.department }}
+      </td>
+      {% endif %}
         <td class="border border-slate-500 p-1">
           {{ emp.employee.designation }}
         </td>

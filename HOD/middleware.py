@@ -12,8 +12,9 @@ class HODGroupRequiredMiddleware(MiddlewareMixin):
             # Apply middleware check only for the 'hod' app
             if app_name == 'hod':
                 # Check if the user is in the HOD group
-                if not request.user.groups.filter(name='HOD').exists():
+                if not request.user.groups.filter(name='HOD').exists() and not request.user.groups.filter(name='vechile_incharge').exists():
                     return HttpResponseForbidden('You do not have permission to view this page.')
+             
       employee_id = view_kwargs.get('employeeId')
       if employee_id:
             # Access the user's profile based on the employeeId
@@ -22,7 +23,7 @@ class HODGroupRequiredMiddleware(MiddlewareMixin):
         HODDepartment = EmployeeProfile.objects.get(user__id=request.user.id)
               
           # Check if the employee's department is in the allowed departments
-        if employee_profile.department != HODDepartment.department :
+        if employee_profile.department != HODDepartment.department and not request.user.groups.filter(name='vechile_incharge').exists():
             # Redirect to a specific page or perform some action
             return HttpResponseForbidden(f"You are not allowed to access {employee_profile.department} department")
             
