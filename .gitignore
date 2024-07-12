@@ -61,4 +61,5 @@ coverage.xml
 *.sublime-project
 .DS_Store
 mbdb/db.sqlite3
+*.sqlite3
 mbdb/
