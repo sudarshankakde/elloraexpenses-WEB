@@ -247,8 +247,11 @@
 
 
       <p class="my-3  flex flex-col items-start"><span>Remarks :</span>
-        {% if approved.approved or total_cost is None or total_cost == 0 %}
-
+        {% if approved.approved and request.user|in_group:"HOD" or total_cost is None or total_cost == 0 %}
+        <span class="h-[100px] border  w-full p-2 rounded-md ">
+          {{approved.remark}}
+        </span>
+        {% elif approved.vechile_incharge_approved or total_cost is None or total_cost == 0 %}
         <span class="h-[100px] border  w-full p-2 rounded-md ">
           {{approved.remark}}
         </span>
